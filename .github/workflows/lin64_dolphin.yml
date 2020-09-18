@@ -1,0 +1,39 @@
+name: Dolphin-libretro Linux x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential libbluetooth-dev
+    - name: Checkout source
+      run: git clone https://github.com/libretro/dolphin.git && cd dolphin && git submodule update --init
+    - name: Build libretro dolphin core
+      working-directory: dolphin
+      run: mkdir build && cd build && cmake -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
+
+    - name: Build the thing
+      working-directory: dolphin/build
+      run: cmake --build . --target dolphin_libretro --config Release
+
+    - name: Prep for release
+      working-directory: dolphin/Binary
+      run: |
+        wget https://raw.githubusercontent.com/libretro/libretro-super/a09053a020deb85cb401118436cc8a79fea89490/retrolink.sh && sh retrolink dolphin_libretro.so
+        zip -9 ../../dolphin_libretro.so.zip dolphin_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_64-bit
+        file: dolphin_libretro.so.zip
+        overwrite: true
