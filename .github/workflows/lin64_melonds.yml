@@ -21,7 +21,7 @@ jobs:
       working-directory: melonds
       run: |
         make HAVE_THREADS=1 HAVE_OPENGL=1 JIT_ARCH=x64 -j8
-        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink melonds_libretro.so
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh melonds_libretro.so
         zip -9 ../melonds_libretro.so.zip melonds_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
