@@ -30,7 +30,7 @@ jobs:
       working-directory: dolphin/Binary
       run: Compress-Archive -CompressionLevel Optimal -Path dolphin_libretro.dll -DestinationPath ..\..\dolphin_libretro.dll.zip
     - name: Create new release
-      uses: marvinpinto/action-automatic-releases@v2
+      uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: Windows_64-bit
