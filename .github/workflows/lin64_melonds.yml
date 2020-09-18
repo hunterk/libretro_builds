@@ -1,4 +1,4 @@
-name: MelonDS-libretro Windows x86_64
+name: MelonDS-libretro Linux x86_64
 
 on:
   schedule:
@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt install wget git build-essential
+      run: sudo apt install wget git build-essential libgl1-mesa-dev
     - name: Checkout source
       run: git clone https://github.com/libretro/melonds.git && cd melonds && git submodule update --init
     - name: Build libretro melonds core
