@@ -1,0 +1,38 @@
+name: MelonDS-libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows via cross-compile
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools
+    - name: Checkout source
+      run: git clone https://github.com/libretro/melonds.git && cd melonds && git submodule update --init
+    - name: Build libretro melonds core
+      working-directory: melonds
+      run: |
+        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win HAVE_THREADS=1 HAVE_OPENGL=1 JIT_ENABLED=1 LDFLAGS+=-lopengl32 LDFLAGS+=-lws2_32 -j8
+        strip -s melonds_libretro.dll
+        zip -9 ../melonds_libretro.dll.zip melonds_libretro.dll
+    - name: Create new release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        automatic_release_tag: Windows_64-bit
+        prerelease: false
+        title: Windows x86_64
+        files: melonds_libretro.dll.zip
+    - name: Save artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: melonds_libretro.dll.zip
+        path: melonds_libretro.dll.zip
