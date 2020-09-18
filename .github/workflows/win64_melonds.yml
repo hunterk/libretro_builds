@@ -24,7 +24,7 @@ jobs:
         strip -s melonds_libretro.dll
         zip -9 ../melonds_libretro.dll.zip melonds_libretro.dll
     - name: Create new release
-      uses: marvinpinto/action-automatic-releases@v2
+      uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: Windows_64-bit
