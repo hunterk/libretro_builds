@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt install wget git build-essential libbluetooth-dev libgl1-mesa-dev libxi-dev x11-utils libx11-dev libxext-dev libxrandr-dev
+      run: sudo apt install wget git build-essential libbluetooth-dev libgl1-mesa-dev libxi-dev x11-utils libx11-dev libxext-dev libxrandr-dev libusb-1.0-0-dev
     - name: Checkout source
       run: git clone https://github.com/libretro/dolphin.git && cd dolphin && git submodule update --init
     - name: Build libretro dolphin core
