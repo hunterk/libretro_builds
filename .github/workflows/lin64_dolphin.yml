@@ -28,7 +28,7 @@ jobs:
     - name: Prep for release
       working-directory: dolphin/Binary
       run: |
-        wget https://raw.githubusercontent.com/libretro/libretro-super/a09053a020deb85cb401118436cc8a79fea89490/retrolink.sh && sh retrolink dolphin_libretro.so
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && sh retrolink dolphin_libretro.so
         zip -9 ../../dolphin_libretro.so.zip dolphin_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
