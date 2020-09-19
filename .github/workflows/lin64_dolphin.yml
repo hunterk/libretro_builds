@@ -26,7 +26,7 @@ jobs:
       run: cmake --build . --target dolphin_libretro --config Release
 
     - name: Prep for release
-      working-directory: dolphin/Binary
+      working-directory: dolphin/build
       run: |
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh dolphin_libretro.so
         zip -9 ../../dolphin_libretro.so.zip dolphin_libretro.so
