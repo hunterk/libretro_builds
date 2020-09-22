@@ -1,11 +1,3 @@
-
-    - name: Setup MINGW64
-      uses: numworks/setup-msys2@v1
-      with:
-        msystem: MINGW64
-    - name: Install needed packages
-      run: msys2do pacman -S --noconfirm --disable-download-timeout --needed wget git make mingw-w64-x86_64-binutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-zlib mingw-w64-x86_64-pkg-config mingw-w64-x86_64-python2 zip p7zip
-
 name: DeSmuME-libretro Windows x86_64
 
 on:
