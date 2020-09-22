@@ -1,0 +1,40 @@
+
+    - name: Setup MINGW64
+      uses: numworks/setup-msys2@v1
+      with:
+        msystem: MINGW64
+    - name: Install needed packages
+      run: msys2do pacman -S --noconfirm --disable-download-timeout --needed wget git make mingw-w64-x86_64-binutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-zlib mingw-w64-x86_64-pkg-config mingw-w64-x86_64-python2 zip p7zip
+
+name: DeSmuME-libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Linux:
+    name: Build for Windows
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential libpcap-dev libgl-dev
+    - name: Checkout source
+      run: git clone https://github.com/libretro/desmume.git && cd desmume && git submodule update --init
+    - name: Build libretro desmume core
+      working-directory: desmume/desmume/src/frontend/libretro
+      run: |
+        make -f Makefile.libretro CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win -j8
+        strip desmume_libretro.dll
+        zip -9 ../../../../../desmume_libretro.dll.zip desmume_libretro.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_64-bit
+        file: desmume_libretro.dll.zip
+        overwrite: true
