@@ -1,0 +1,36 @@
+name: bsnes-hd-beta libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows
+    runs-on: windows-latest
+
+    steps:
+    - name: Setup MINGW64
+      uses: numworks/setup-msys2@v1
+      with:
+        msystem: MINGW64
+    - name: Install needed packages
+      run: msys2do pacman -S --noconfirm --disable-download-timeout --needed wget git make mingw-w64-x86_64-binutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-zlib mingw-w64-x86_64-pkg-config mingw-w64-x86_64-openmp zip
+    - name: Checkout source
+      run: git clone https://github.com/DerKoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
+    - name: Build libretro core
+      working-directory: bsnes-hd/bsnes
+      run: |
+        msys2do make -f GNUmakefile platform=windows target=libretro -j4
+        strip.exe -s bsnes_hd_beta_libretro.dll
+        msys2do zip -9 ../../bsnes_hd_beta_libretro.dll.zip out/bsnes_hd_beta_libretro.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: bsnes_hd_beta_libretro.dll.zip
+        overwrite: true
