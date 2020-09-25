@@ -18,7 +18,7 @@ jobs:
       with:
         msystem: MINGW64
     - name: Install needed packages
-      run: msys2do pacman -S --noconfirm --disable-download-timeout --needed wget git make mingw-w64-x86_64-binutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-zlib mingw-w64-x86_64-pkg-config mingw-w64-x86_64-openmp zip
+      run: msys2do pacman -S --noconfirm --disable-download-timeout --needed wget git make mingw-w64-x86_64-binutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-zlib mingw-w64-x86_64-pkg-config zip
     - name: Checkout source
       run: git clone https://github.com/DerKoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
     - name: Build libretro core
