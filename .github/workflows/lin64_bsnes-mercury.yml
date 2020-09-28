@@ -1,0 +1,34 @@
+name: bsnes-mercury libretro Linux x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      run: git clone https://github.com/libretro/bsnes-mercury.git && cd bsnes-mercury && git submodule update --init
+    - name: Build libretro core
+      working-directory: bsnes-mercury
+      run: |
+        make target=libretro profile=performance -j8 && mv out/*.so ../ && make clean
+        make target=libretro profile=balanced -j8 && mv out/*.so ../ && make clean
+        make target=libretro profile=accuracy -j8 && mv out/*.so ../
+    - name: strip libs
+      run: wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh *.so
+    - name: zip libs
+      run: zip -9 bsnes-mercury-bundle.zip *.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_64-bit
+        file: bsnes-mercury-bundle.zip
+        overwrite: true
