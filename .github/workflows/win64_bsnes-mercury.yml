@@ -1,0 +1,36 @@
+name: bsnes-mercury libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows via cross-compile
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools
+    - name: Checkout source
+      run: git clone https://github.com/libretro/bsnes-mercury.git && cd bsnes-mercury && git submodule update --init
+    - name: Build libretro core
+      working-directory: bsnes-mercury
+      run: |
+        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=performance -j8 && mv out/*.dll ../ && make clean
+        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=balanced -j8 && mv out/*.dll ../ && make clean
+        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=accuracy -j8 && mv out/*.dll ../
+    - name: strip libs
+      run: strip -s *.dll
+    - name: zip libs
+      run: zip -9 bsnes-mercury-bundle.zip *.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: bsnes-mercury-bundle.zip
+        overwrite: true
