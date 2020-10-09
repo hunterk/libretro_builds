@@ -16,7 +16,7 @@ jobs:
     - name: Install needed packages
       run: sudo apt install wget git build-essential libgl1-mesa-dev
     - name: Checkout source
-      run: git clone https://github.com/libretro/gw-libretro.git && cd gw && git submodule update --init
+      run: git clone https://github.com/libretro/gw-libretro.git && cd gw-libretro && git submodule update --init
     - name: Build libretro core
       working-directory: gw-libretro
       run: |
