@@ -1,0 +1,32 @@
+name: GW-libretro Linux x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential libgl1-mesa-dev
+    - name: Checkout source
+      run: git clone https://github.com/libretro/gw-libretro.git && cd gw && git submodule update --init
+    - name: Build libretro core
+      working-directory: gw-libretro
+      run: |
+        make -f Makefile.libretro -j8
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh gw_libretro.so
+        zip -9 ../gw_libretro.so.zip gw_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_64-bit
+        file: gw_libretro.so.zip
+        overwrite: true

@@ -1,0 +1,32 @@
+name: GW-libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows via cross-compile
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools
+    - name: Checkout source
+      run: git clone https://github.com/libretro/gw-libretro.git && cd gw-libretro && git submodule update --init
+    - name: Build libretro core
+      working-directory: gw-libretro
+      run: |
+        make -f Makefile.libretro CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win -j8
+        strip -s gw_libretro.dll
+        zip -9 ../gw_libretro.dll.zip gw_libretro.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: gw_libretro.dll.zip
+        overwrite: true
