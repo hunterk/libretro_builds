@@ -20,9 +20,9 @@ jobs:
     - name: Build libretro core
       working-directory: bsnes-mercury
       run: |
-        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=performance -j8 && mv out/*.dll ../ && make clean
-        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=balanced -j8 && mv out/*.dll ../ && make clean
-        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=accuracy -j8 && mv out/*.dll ../
+        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=performance -j8 && mv *.dll ../ && make clean
+        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=balanced -j8 && mv *.dll ../ && make clean
+        make CC=/usr/bin/x86_64-w64-mingw32-gcc CXX=/usr/bin/x86_64-w64-mingw32-g++ platform=win target=libretro profile=accuracy -j8 && mv *.dll ../
     - name: strip libs
       run: strip -s *.dll
     - name: zip libs
