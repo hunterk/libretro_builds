@@ -18,9 +18,9 @@ jobs:
     - name: Build libretro core
       working-directory: bsnes-mercury
       run: |
-        make target=libretro profile=performance -j8 && mv out/*.so ../ && make clean
-        make target=libretro profile=balanced -j8 && mv out/*.so ../ && make clean
-        make target=libretro profile=accuracy -j8 && mv out/*.so ../
+        make target=libretro profile=performance -j8 && mv *.so ../ && make clean
+        make target=libretro profile=balanced -j8 && mv *.so ../ && make clean
+        make target=libretro profile=accuracy -j8 && mv *.so ../
     - name: strip libs
       run: wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh *.so
     - name: zip libs
