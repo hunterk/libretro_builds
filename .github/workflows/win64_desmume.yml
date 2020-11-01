@@ -27,6 +27,6 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: Linux_64-bit
+        tag: Windows_64-bit
         file: desmume_libretro.dll.zip
         overwrite: true
