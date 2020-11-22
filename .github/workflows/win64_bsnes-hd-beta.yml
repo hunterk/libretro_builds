@@ -14,19 +14,25 @@ jobs:
 
     steps:
     - name: Setup MINGW64
-      uses: numworks/setup-msys2@v1
+      uses: msys2/setup-msys2@v2
       with:
-        msystem: MINGW64
-    - name: Install needed packages
-      run: msys2do pacman -S --noconfirm --disable-download-timeout --needed wget git make mingw-w64-x86_64-binutils mingw-w64-x86_64-toolchain mingw-w64-x86_64-zlib mingw-w64-x86_64-pkg-config zip
+        update: true
+        install: >-
+          wget
+          git
+          make
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-zlib
+          mingw-w64-x86_64-pkg-config
+          zip
     - name: Checkout source
       run: git clone https://github.com/DerKoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
-    - name: Build libretro core
-      working-directory: bsnes-hd/bsnes
+    - shell: msys2 {0}
       run: |
-        msys2do make -f GNUmakefile platform=windows target=libretro -j4
-        strip.exe -s bsnes_hd_beta_libretro.dll
-        msys2do zip -9 ../../bsnes_hd_beta_libretro.dll.zip out/bsnes_hd_beta_libretro.dll
+        make -f GNUmakefile platform=windows target=libretro -j4
+        msys2 -c strip.exe -s bsnes_hd_beta_libretro.dll
+        zip -9 ../../bsnes_hd_beta_libretro.dll.zip out/bsnes_hd_beta_libretro.dll
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
