@@ -28,6 +28,7 @@ jobs:
     - name: Checkout source
       run: git clone https://github.com/DerKoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
     - shell: msys2 {0}
+      working-directory: bsnes-hd/bsnes
       run: |
         make -f GNUmakefile platform=windows target=libretro -j4
         msys2 -c strip.exe -s bsnes_hd_beta_libretro.dll
