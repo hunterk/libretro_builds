@@ -31,7 +31,6 @@ jobs:
       working-directory: bsnes-hd/bsnes
       run: |
         make -f GNUmakefile platform=windows target=libretro -j4
-#        msys2 -c strip.exe -s out/bsnes_hd_beta_libretro.dll
         zip -9 ../../bsnes_hd_beta_libretro.dll.zip out/bsnes_hd_beta_libretro.dll
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
