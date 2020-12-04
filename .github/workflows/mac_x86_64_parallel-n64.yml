@@ -19,7 +19,7 @@ jobs:
       working-directory: parallel-n64
       run: |
         make -j8
-        zip -9 ../parallel_n64_libretro.dylib.zip out/parallel_n64_libretro.dylib
+        zip -9 ../parallel_n64_libretro.dylib.zip parallel_n64_libretro.dylib
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
