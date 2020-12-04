@@ -1,4 +1,4 @@
-name: Mupen64plus-Next libretro Mac x86_64
+name: ParaLLEl-N64 libretro Mac x86_64
 
 on:
   schedule:
@@ -14,16 +14,16 @@ jobs:
 
     steps:
     - name: Checkout source
-      run: git clone https://github.com/libretro/mupen64plus-libretro-nx.git && cd mupen64plus-libretro-nx && git submodule update --init
+      run: git clone https://github.com/libretro/parallel-n64.git && cd parallel-n64 && git submodule update --init
     - name: Build libretro core
-      working-directory: mupen64plus-libretro-nx
+      working-directory: parallel-n64
       run: |
         make -j8
-        zip -9 ../mupen64plus_next_libretro.dylib.zip out/mupen64plus_next_libretro.dylib
+        zip -9 ../parallel_n64_libretro.dylib.zip out/parallel_n64_libretro.dylib
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: macOS_x86_64
-        file: mupen64plus_next_libretro.dylib.zip
+        file: parallel_n64_libretro.dylib.zip
         overwrite: true
