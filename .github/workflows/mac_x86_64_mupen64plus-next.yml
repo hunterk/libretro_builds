@@ -1,0 +1,29 @@
+name: Mupen64plus-Next libretro Mac x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Linux:
+    name: Build for macOS
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout source
+      run: git clone https://github.com/libretro/mupen64plus-libretro-nx.git && cd mupen64plus-libretro-nx && git submodule update --init
+    - name: Build libretro core
+      working-directory: mupen64plus-libretro-nx
+      run: |
+        make -j8
+        zip -9 ../mupen64plus_next_libretro.dylib.zip out/mupen64plus_next_libretro.dylib
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: macOS_x86_64
+        file: mupen64plus_next_libretro.dylib.zip
+        overwrite: true
