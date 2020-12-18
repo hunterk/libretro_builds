@@ -1,5 +1,7 @@
 # libretro_builds
-Automated builds of libretro cores for Windows and Linux 64-bit
+Automated builds of RetroArch and libretro cores for Windows and Linux 64-bit (and some macOS Intel 64-bit)
+| RetroArch | [![RetroArch Nightly Build](https://github.com/hizzlekizzle/RetroArch-AppImage/workflows/RetroArch%20Nightly%20Build/badge.svg)](https://github.com/hizzlekizzle/RetroArch-AppImage/releases/tag/Nightlies) |
+| --------- |:--------------------------------|
 
 | Core Name | Windows | Linux | macOS (Intel) |
 | --------- |:-------:|:-----:|:-------------:|
