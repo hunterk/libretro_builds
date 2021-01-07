@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt install wget git build-essential libbluetooth-dev libgl1-mesa-dev libxi-dev x11-utils libx11-dev libxext-dev libxrandr-dev libusb-1.0-0-dev
+      run: sudo apt install wget git build-essential libbluetooth-dev libgl1-mesa-dev libxi-dev x11-utils libx11-dev libxext-dev libxrandr-dev libpthread-stubs0-dev && sudo snap install cmake --classic
     - name: Checkout source
       run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
     - name: Build libretro citra core
