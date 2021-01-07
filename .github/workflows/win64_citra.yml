@@ -1,0 +1,36 @@
+name: Citra-libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows
+    runs-on: windows-latest
+
+    steps:
+    - name: Get latest CMake
+      uses: lukka/get-cmake@latest
+    - name: Checkout source
+      run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
+    - name: Build libretro citra core
+      working-directory: citra
+      run: mkdir build && cd build && cmake.exe -DENABLE_LIBRETRO=1 -DLIBRETRO_STATIC=1 -DENABLE_SDL2=0 -DENABLE_QT=0 -DCMAKE_BUILD_TYPE="Release" -DENABLE_WEB_SERVICE=0 ..
+    - name: Build the thing
+      working-directory: citra/build
+      run: cmake.exe --build . --target citra_libretro
+
+    - name: Prep for release
+      working-directory: citra\build\src\citra_libretro
+      run: Compress-Archive -CompressionLevel Optimal -Path citra_libretro.dll -DestinationPath ..\..\..\..\citra_libretro.dll.zip
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: citra_libretro.dll.zip
+        overwrite: true
