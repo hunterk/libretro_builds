@@ -19,13 +19,14 @@ jobs:
         install: >-
           wget
           git
-          cmake
           make
           mingw-w64-x86_64-binutils
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-zlib
           mingw-w64-x86_64-pkg-config
           zip
+    - name: Get latest cmake
+      uses: lukka/get-cmake@latest
     - name: Checkout source
       run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
     - shell: msys2 {0}
