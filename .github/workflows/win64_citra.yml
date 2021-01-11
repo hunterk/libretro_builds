@@ -20,18 +20,17 @@ jobs:
           wget
           git
           make
+          cmake
           mingw-w64-x86_64-binutils
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-zlib
           mingw-w64-x86_64-pkg-config
           zip
-    - name: Get latest cmake
-      uses: lukka/get-cmake@latest
     - name: Checkout source
       run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
     - shell: msys2 {0}
       working-directory: citra
-      run: mkdir build && cd build && cmake -DENABLE_LIBRETRO=1 -DLIBRETRO_STATIC=1 -DENABLE_SDL2=0 -DENABLE_QT=0 -DCMAKE_BUILD_TYPE="Release" -DENABLE_WEB_SERVICE=0 ..
+      run: mkdir build && cd build && cmake -DENABLE_LIBRETRO=1 -DLIBRETRO_STATIC=1 -DENABLE_SDL2=0 -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DENABLE_WEB_SERVICE=0 ..
     - name: Build the thing
       working-directory: citra/build
       run: cmake --build . --target citra_libretro
