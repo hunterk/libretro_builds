@@ -10,7 +10,7 @@ on:
 jobs:
   Windows:
     name: Build for Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
 
     steps:
     - name: Install needed packages
