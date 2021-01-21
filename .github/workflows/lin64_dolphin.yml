@@ -19,7 +19,7 @@ jobs:
       run: git clone https://github.com/libretro/dolphin.git && cd dolphin && git submodule update --init
     - name: Build libretro dolphin core
       working-directory: dolphin
-      run: mkdir build && cd build && cmake -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
+      run: mkdir build && cd build && cmake -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7 -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
 
     - name: Build the thing
       working-directory: dolphin/build
