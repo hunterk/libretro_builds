@@ -26,8 +26,8 @@ jobs:
       run: cmake.exe --build .
 
     - name: Prep for release
-      working-directory: Play-\build\Source\ui_libretro
-      run: Compress-Archive -CompressionLevel Optimal -Path play_libretro.dll -DestinationPath ..\..\..\..\play_libretro.dll.zip
+      working-directory: Play-\build\Source\ui_libretro\Debug
+      run: Compress-Archive -CompressionLevel Optimal -Path play_libretro.dll -DestinationPath ..\..\..\..\..\play_libretro.dll.zip
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
