@@ -19,7 +19,7 @@ jobs:
       run: git clone https://github.com/jpd002/Play-.git && cd Play- && git submodule update --init --recursive
     - name: Build libretro Play core
       working-directory: Play-
-      run: mkdir build && cd build && cmake.exe -DBUILD_LIBRETRO_CORE=yes -DBUILD_PLAY=off -DBUILD_TESTS=no -DENABLE_AMAZON_S3=no  -DCMAKE_BUILD_TYPE="Release" -G"Visual Studio 15 2017 Win64" ..
+      run: mkdir build && cd build && cmake.exe -DBUILD_LIBRETRO_CORE=yes -DBUILD_PLAY=off -DBUILD_TESTS=no -DENABLE_AMAZON_S3=no  -DCMAKE_BUILD_TYPE="Release" -G "Visual Studio 16 2019" ..
 
     - name: Build the thing
       working-directory: Play-\build
