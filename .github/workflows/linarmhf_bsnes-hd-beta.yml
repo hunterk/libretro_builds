@@ -21,7 +21,7 @@ jobs:
       working-directory: bsnes-hd/bsnes
       run: |
         make -f GNUmakefile target=libretro -j8 CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++
-        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh bsnes_hd_beta_libretro.so
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh out/bsnes_hd_beta_libretro.so
         zip -9 ../../bsnes_hd_beta_libretro.so.zip out/bsnes_hd_beta_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
