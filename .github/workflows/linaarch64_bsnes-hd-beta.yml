@@ -1,0 +1,32 @@
+name: bsnes-hd-beta libretro Linux x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Linux:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential gcc make gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+    - name: Checkout source
+      run: git clone https://github.com/derkoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
+    - name: Build libretro core
+      working-directory: bsnes-hd/bsnes
+      run: |
+        make -f GNUmakefile target=libretro -j8 CC=aarch64-linux-gnueabi-gcc CXX=aarch64-linux-gnueabi-g++
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh bsnes_hd_beta_libretro.so
+        zip -9 ../../bsnes_hd_beta_libretro.so.zip out/bsnes_hd_beta_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_aarch64
+        file: bsnes_hd_beta_libretro.so.zip
+        overwrite: true
