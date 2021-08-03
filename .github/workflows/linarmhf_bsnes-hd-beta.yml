@@ -3,9 +3,9 @@ name: bsnes-hd-beta libretro Linux armhf
 on:
   schedule:
     - cron: '0 2 * * *' # run at 2 AM UTC
-#  watch: # this is a hack that lets repo owners trigger a build by starring
-#    types: [started]
-#    if: github.actor == github.event.repository.owner.login
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Linux:
@@ -13,14 +13,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: add foreign arch
+      run: |
+        sudo dpkg --add-architecture armhf
+        sudo rm -rf /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal main restricted" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-updates main restricted" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal universe" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-updates universe" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal main restricted" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal-updates main restricted" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal universe" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal-updates universe" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports focal-backports main restricted universe multiverse"  | sudo tee -a /etc/apt/sources.list
     - name: Install needed packages
-      run: sudo apt install wget git build-essential gcc make g++-arm-linux-gnueabi gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi
+      run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 gcc:amd64 make:amd64 g++-arm-linux-gnueabihf:amd64 gcc-arm-linux-gnueabihf:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:armhf libxext-dev:armhf
     - name: Checkout source
       run: git clone https://github.com/derkoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
     - name: Build libretro core
       working-directory: bsnes-hd/bsnes
       run: |
-        make -f GNUmakefile target=libretro -j8 compiler=arm-linux-gnueabi-g++
+        make -f GNUmakefile target=libretro -j8 compiler=/usr/bin/arm-linux-gnueabihf-g++
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh bsnes_hd_beta_libretro.so
         zip -9 ../../bsnes_hd_beta_libretro.so.zip bsnes_hd_beta_libretro.so
     - name: Create new release
