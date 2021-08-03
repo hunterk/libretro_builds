@@ -1,4 +1,4 @@
-name: bsnes-hd-beta libretro Linux x86_64
+name: bsnes-hd-beta libretro Linux armhf
 
 on:
   schedule:
