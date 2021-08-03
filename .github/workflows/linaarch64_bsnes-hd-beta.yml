@@ -20,7 +20,7 @@ jobs:
     - name: add foreign arch
       run: sudo dpkg --add-architecture arm64
     - name: fetch some cross deps
-      run: wget http://ports.ubuntu.com/pool/main/libx/libx11/libx11-dev_1.6.4-3_arm64.deb && wget http://ports.ubuntu.com/pool/main/libx/libxext/libxext-dev_1.3.3-1_arm64.deb && sudo dpkg -i *.deb
+      run: wget http://ports.ubuntu.com/pool/main/libx/libx11/libx11-dev_1.6.9-2ubuntu1.2_arm64.deb && wget http://ports.ubuntu.com/pool/main/libx/libxext/libxext-dev_1.3.4-0ubuntu1_arm64.deb && sudo dpkg -i *.deb
     - name: Build libretro core
       working-directory: bsnes-hd/bsnes
       run: |
