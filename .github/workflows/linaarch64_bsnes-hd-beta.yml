@@ -18,7 +18,7 @@ jobs:
     - name: Checkout source
       run: git clone https://github.com/derkoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
     - name: add foreign arch
-      run: sudo dpkg --add-architecture arm64 && echo "deb [arch=arm64] http://us.archive.ubuntu.com/ubuntu/ focal main restricted" | sudo tee -a /etc/apt/sources.list && sudo apt update
+      run: sudo dpkg --add-architecture arm64 && echo "deb [arch=arm64] http://archive.ubuntu.com/ubuntu/ focal main restricted" | sudo tee -a /etc/apt/sources.list && sudo apt update
     - name: fetch some cross deps
       run: sudo apt install libx11-dev libxext-dev
     - name: Build libretro core
