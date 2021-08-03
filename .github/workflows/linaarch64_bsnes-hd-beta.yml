@@ -18,7 +18,7 @@ jobs:
     - name: Checkout source
       run: git clone https://github.com/derkoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
     - name: add foreign arch
-      run: sudo dpkg --add-architecture arm64 && echo "deb [arch=arm64] http://archive.ubuntu.com/ubuntu/ focal main restricted" | sudo tee -a /etc/apt/sources.list && sudo apt update
+      run: sudo dpkg --add-architecture arm64 && sudo rm -rf /etc/apt/sources.list && echo "deb [arch=arm64,amd64] http://ports.ubuntu.com/ bionic main restricted\n\ deb [arch=arm64,amd64] http://ports.ubuntu.com/ bionic-updates main restricted\n\ deb [arch=arm64,amd64] http://ports.ubuntu.com/ bionic universe\n\ deb [arch=arm64,amd64] http://ports.ubuntu.com/ bionic-updates universe\n\ deb [arch=arm64,amd64] http://ports.ubuntu.com/ bionic multiverse\n\ deb [arch=arm64,amd64] http://ports.ubuntu.com/ bionic-updates multiverse\n\ deb [arch=arm64,amd64] http://ports.ubuntu.com/ bionic-backports main restricted universe multiverse"\ | tee -a /etc/apt/sources.list
     - name: fetch some cross deps
       run: sudo apt install libx11-dev libxext-dev
     - name: Build libretro core
