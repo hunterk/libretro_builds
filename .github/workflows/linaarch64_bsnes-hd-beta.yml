@@ -18,9 +18,9 @@ jobs:
     - name: Checkout source
       run: git clone https://github.com/derkoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
     - name: add foreign arch
-      run: sudo dpkg --add-architecture arm64
+      run: sudo dpkg --add-architecture arm64 && sudo echo "deb [arch=arm64] http://us.archive.ubuntu.com/ubuntu/ focal main restricted" >> /etc/apt/sources.list && sudo apt update
     - name: fetch some cross deps
-      run: wget http://ports.ubuntu.com/pool/main/libx/libx11/libx11-dev_1.6.9-2ubuntu1.2_arm64.deb && wget http://ports.ubuntu.com/pool/main/libx/libxext/libxext-dev_1.3.4-0ubuntu1_arm64.deb && sudo dpkg -i *.deb
+      run: sudo apt install libx11-dev libxext-dev
     - name: Build libretro core
       working-directory: bsnes-hd/bsnes
       run: |
