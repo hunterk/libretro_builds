@@ -17,13 +17,13 @@ jobs:
       run: |
         sudo dpkg --add-architecture arm64
         sudo rm -rf /etc/apt/sources.list
-        echo "deb [arch=amd64] http://ports.ubuntu.com/ focal main restricted" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://ports.ubuntu.com/ focal-updates main restricted" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://ports.ubuntu.com/ focal universe" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://ports.ubuntu.com/ focal-updates universe" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://ports.ubuntu.com/ focal multiverse" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://ports.ubuntu.com/ focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://ports.ubuntu.com/ focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ focal main restricted" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ focal-updates main restricted" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ focal universe" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ focal-updates universe" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ focal multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
+        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
         echo "deb [arch=arm64] http://ports.ubuntu.com/ focal main restricted" | sudo tee -a /etc/apt/sources.list
         echo "deb [arch=arm64] http://ports.ubuntu.com/ focal-updates main restricted" | sudo tee -a /etc/apt/sources.list
         echo "deb [arch=arm64] http://ports.ubuntu.com/ focal universe" | sudo tee -a /etc/apt/sources.list
