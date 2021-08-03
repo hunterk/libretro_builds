@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: bsnes-hd/bsnes
       run: |
-        make -f GNUmakefile target=libretro -j8 compiler=/usr/bin/aarch64-linux-gnueabi-g++
+        make -f GNUmakefile target=libretro -j8 compiler=/usr/bin/aarch64-linux-gnu-g++
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh bsnes_hd_beta_libretro.so
         zip -9 ../../bsnes_hd_beta_libretro.so.zip bsnes_hd_beta_libretro.so
     - name: Create new release
