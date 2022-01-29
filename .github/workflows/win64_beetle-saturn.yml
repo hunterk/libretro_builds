@@ -26,7 +26,7 @@ jobs:
           mingw-w64-x86_64-pkg-config
           zip
     - name: Checkout source
-      run: git clone https://github.com/hiddenasbestos/beetle-saturn-libretro.git && cd beetle-saturn-libretro && git submodule update --init && git checkout -b mednafen_1_24_3
+      run: git clone https://github.com/hiddenasbestos/beetle-saturn-libretro.git && cd beetle-saturn-libretro && git submodule update --init && git checkout mednafen_1_24_3
     - shell: msys2 {0}
       working-directory: beetle-saturn-libretro
       run: |
