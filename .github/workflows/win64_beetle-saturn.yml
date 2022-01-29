@@ -1,0 +1,41 @@
+name: beetle-saturn libretro Windows x86_64
+
+on:
+#  schedule:
+#    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          wget
+          git
+          make
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-zlib
+          mingw-w64-x86_64-pkg-config
+          zip
+    - name: Checkout source
+      run: git clone https://github.com/hiddenasbestos/beetle-saturn-libretro.git && cd beetle-saturn-libretro && git submodule update --init && git checkout -b mednafen_1_24_3
+    - shell: msys2 {0}
+      working-directory: beetle-saturn-libretro
+      run: |
+        make -j8
+        zip -9 ../mednafen_saturn_libretro.dll.zip mednafen_saturn_libretro.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: mednafen_saturn_libretro.dll.zip
+        overwrite: true

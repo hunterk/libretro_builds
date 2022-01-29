@@ -1,0 +1,32 @@
+name: beetle-saturn libretro Linux x86_64
+
+on:
+#  schedule:
+#    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Linux:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential
+    - name: Checkout source
+      run: git clone https://github.com/hiddenasbestos/beetle-saturn-libretro.git && cd beetle-saturn-libretro && git submodule update --init && git checkout -b mednafen_1_24_3
+    - name: Build libretro core
+      working-directory: beetle-saturn-libretro
+      run: |
+        make -j8
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh mednafen_saturn_libretro.so
+        zip -9 ../mednafen_saturn_libretro.so.zip mednafen_saturn_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_64-bit
+        file: mednafen_saturn_libretro.so.zip
+        overwrite: true
