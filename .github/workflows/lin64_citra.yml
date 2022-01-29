@@ -18,18 +18,15 @@ jobs:
     - name: Get latest cmake
       uses: lukka/get-cmake@latest
     - name: Checkout source
-      run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
+      run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive && git checkout new-rebase
     - name: Build libretro citra core
       working-directory: citra
-      run: mkdir build && cd build && cmake -DENABLE_LIBRETRO=1 -DLIBRETRO_STATIC=1 -DENABLE_SDL2=0 -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DENABLE_WEB_SERVICE=0 ..
-    - name: Build the thing
-      working-directory: citra/build
-      run: cmake --build . --target citra_libretro
+      run: make -j8
     - name: Prep for release
-      working-directory: citra/build/src/citra_libretro
+      working-directory: citra
       run: |
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh citra_libretro.so
-        zip -9 ../../../../citra_libretro.so.zip citra_libretro.so
+        zip -9 ../citra_libretro.so.zip citra_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:

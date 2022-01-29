@@ -27,16 +27,13 @@ jobs:
           mingw-w64-x86_64-pkg-config
           zip
     - name: Checkout source
-      run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
+      run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive && git checkout new-rebase
     - shell: msys2 {0}
       working-directory: citra
-      run: mkdir build && cd build && cmake -DENABLE_LIBRETRO=1 -DLIBRETRO_STATIC=1 -DENABLE_SDL2=0 -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DENABLE_WEB_SERVICE=0 ..
-    - name: Build the thing
-      working-directory: citra/build
-      run: cmake --build . --target citra_libretro
+      run: make -j8
     - name: Prep for release
-      working-directory: citra\build\src\citra_libretro
-      run: zip -9 ..\..\..\..\citra_libretro.dll.zip citra_libretro.dll
+      working-directory: citra
+      run: zip -9 ..\citra_libretro.dll.zip citra_libretro.dll
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
