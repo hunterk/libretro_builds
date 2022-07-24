@@ -3,9 +3,9 @@ name: scummvm libretro Linux aarch64
 on:
   schedule:
     - cron: '0 2 * * *' # run at 2 AM UTC
-  watch: # this is a hack that lets repo owners trigger a build by starring
-    types: [started]
-    if: github.actor == github.event.repository.owner.login
+#  watch: # this is a hack that lets repo owners trigger a build by starring
+#    types: [started]
+#    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Linux:
@@ -39,7 +39,7 @@ jobs:
       working-directory: scummvm/backends/platform/libretro/build
       run: |
         make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
-        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh scummvm_libretro.so
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh scummvm_libretro.so
         zip -9 ../../../../../scummvm_libretro.so.zip scummvm_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
