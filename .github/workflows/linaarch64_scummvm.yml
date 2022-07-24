@@ -40,7 +40,7 @@ jobs:
       run: |
         make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh scummvm_libretro.so
-        zip -9 ../../../../scummvm_libretro.so.zip scummvm_libretro.so
+        zip -9 ../../../../../scummvm_libretro.so.zip scummvm_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
