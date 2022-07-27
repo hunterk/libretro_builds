@@ -40,7 +40,7 @@ jobs:
       run: |
         make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++ platform=arm64_cortex_a53_gles2 ARCH=aarch64
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh mupen64plus_next_libretro.so
-        zip -9 ../mupen64plus_next_libretro.so.zip so.dylib
+        zip -9 ../mupen64plus_next_libretro.so.zip mupen64plus_next_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
