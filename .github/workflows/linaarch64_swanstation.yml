@@ -38,10 +38,10 @@ jobs:
     - name: Build libretro core
       working-directory: swanstation
       run: |
-        mkdir build && cd build && cmake ..
-        make -j8 -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc -DCMAKE_C++_COMPILER=/usr/bin/aarch64-linux-gnu-g++ -DUSE_EGL=ON -DCMAKE_SYSTEM_PROCESSOR=aarch64
+        mkdir build && cd build && cmake .. -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc -DCMAKE_C++_COMPILER=/usr/bin/aarch64-linux-gnu-g++ -DUSE_EGL=ON -DCMAKE_SYSTEM_PROCESSOR=aarch64
+        make -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh swanstation_libretro.so
-        zip -9 ../swanstation_libretro.so.zip swanstation_libretro.so
+        zip -9 ../../swanstation_libretro.so.zip swanstation_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
