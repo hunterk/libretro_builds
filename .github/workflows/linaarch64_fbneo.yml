@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: FBNeo/src/burner/libretro
       run: |
-        make -f Makefile.libretro -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
+        make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh fbneo_libretro.so
         zip -9 ../../../../fbneo_libretro.so.zip fbneo_libretro.so
     - name: Create new release
