@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro melonds core
       working-directory: melonds
       run: |
-        make CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++ platform=rpi4_64 -j8
+        make CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++ platform=unix ARCH=arm64 JIT_ARCH=aarch64 HAVE_OPENGLES3=1 HAVE_THREADS=1 -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh melonds_libretro.so
         zip -9 ../melonds_libretro.so.zip melonds_libretro.so
     - name: Create new release
