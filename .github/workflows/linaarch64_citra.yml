@@ -32,7 +32,7 @@ jobs:
         echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
         echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-backports main restricted universe multiverse"  | sudo tee -a /etc/apt/sources.list
     - name: Install needed packages
-      run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 gcc:amd64 make:amd64 g++-aarch64-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:arm64 libxext-dev:arm64 libbluetooth-dev:arm64 libgl1-mesa-dev:arm64 libxi-dev:arm64 x11-utils:arm64 libxrandr-dev:arm64 libpthread-stubs0-dev:arm64
+      run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 gcc:amd64 make:amd64 g++-aarch64-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 yasm:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:arm64 libxext-dev:arm64 libbluetooth-dev:arm64 libgl1-mesa-dev:arm64 libxi-dev:arm64 x11-utils:arm64 libxrandr-dev:arm64 libpthread-stubs0-dev:arm64
     - name: Checkout source
       run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
     - name: Build libretro core
