@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: citra
       run: |
-        make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++ platform=unix ARCH=aarch64 HAVE_DYNARMIC=1 HAVE_FFMPEG_CROSSCOMPILE=1
+        make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++ platform=unix ARCH=aarch64 HAVE_DYNARMIC=1 HAVE_FFMPEG_STATIC=1
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh citra_libretro.so
         zip -9 ../citra_libretro.so.zip citra_libretro.so
     - name: Create new release
