@@ -36,11 +36,11 @@ jobs:
     - name: Checkout source
       run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
     - name: Build libretro core
-      working-directory: citra/src/citra_libretro
+      working-directory: citra
       run: |
-        mkdir build && cd build && cmake .. -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=/usr/bin/aarch64-linux-gnu-g++
-        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh citra_libretro.so
-        zip -9 ../../../../citra_libretro.so.zip citra_libretro.so
+        make -f Makefile.libretro -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh citra_libretro.so
+        zip -9 ../citra_libretro.so.zip citra_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
