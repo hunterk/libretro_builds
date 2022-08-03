@@ -34,7 +34,7 @@ jobs:
     - name: Install needed packages
       run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 gcc:amd64 make:amd64 g++-aarch64-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:arm64 libxext-dev:arm64
     - name: Checkout source
-      run: git clone https://github.com/libretro/pcsx_rearmed.git && cd pcsx_rearmed && git submodule update --init
+      run: git clone https://github.com/libretro/pcsx_rearmed.git
     - name: Build libretro core
       working-directory: pcsx_rearmed
       run: |
