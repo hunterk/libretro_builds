@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: dosbox-pure
       run: |
-        make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
+        make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++ platform=ARM_RPI4 STRIPCMD='echo skipstrip'
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh dosbox_pure_libretro.so
         zip -9 ../dosbox_pure_libretro.so.zip dosbox_pure_libretro.so
     - name: Create new release
