@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: flycast
       run: | 
-        mkdir build && cd build && cmake .. -DLIBRETRO=ON -DUSE_GLES2=ON -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=/usr/bin/aarch64-linux-gnu-g++ -DUSE_EGL=ON -DCMAKE_SYSTEM_PROCESSOR=aarch64
+        mkdir build && cd build && cmake .. -DLIBRETRO=ON -DUSE_GLES2=ON -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=/usr/bin/aarch64-linux-gnu-g++ -DUSE_EGL=ON
         make -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh flycast_libretro.so
         zip -9 ../../flycast_libretro.so.zip flycast_libretro.so
