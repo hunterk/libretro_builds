@@ -1,4 +1,4 @@
-name: scummvm libretro Linux aarch64
+name: scummvm libretro Linux x86_64
 
 on:
   schedule:
