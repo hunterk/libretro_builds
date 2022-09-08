@@ -3,9 +3,9 @@ name: scummvm libretro Linux aarch64
 on:
   schedule:
     - cron: '0 2 * * *' # run at 2 AM UTC
-#  watch: # this is a hack that lets repo owners trigger a build by starring
-#    types: [started]
-#    if: github.actor == github.event.repository.owner.login
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Linux:
@@ -34,7 +34,9 @@ jobs:
     - name: Install needed packages
       run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 gcc:amd64 make:amd64 g++-aarch64-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:arm64 libxext-dev:arm64
     - name: Checkout source
-      run: git clone https://github.com/libretro/scummvm.git && cd scummvm && git submodule update --init
+      run: git clone https://github.com/scummvm/scummvm.git && cd scummvm && git submodule update --init
+    - name: Checkout libretro backend source
+      run: git clone https://github.com/diablodiab/libretro-scummvm-backend.git && mv libretro-scummvm-backend scummvm/backends/platform/libretro
     - name: Build libretro core
       working-directory: scummvm/backends/platform/libretro/build
       run: |
