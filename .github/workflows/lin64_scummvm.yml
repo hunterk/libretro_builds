@@ -22,7 +22,7 @@ jobs:
     - name: Build libretro core
       working-directory: scummvm/backends/platform/libretro/build
       run: |
-        make -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
+        make -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh scummvm_libretro.so
         zip -9 ../../../../../scummvm_libretro.so.zip scummvm_libretro.so
     - name: Create new release
