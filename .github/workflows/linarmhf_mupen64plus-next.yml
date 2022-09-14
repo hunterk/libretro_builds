@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: mupen64plus-libretro-nx
       run: |
-        make -j8 CC=/usr/bin/arm-linux-gnueabihf-gcc CXX=/usr/bin/arm-linux-gnueabihf-g++ platform=rpi ARCH=arm WITH_DYNAREC=arm
+        make -j8 CC=/usr/bin/arm-linux-gnueabihf-gcc CXX=/usr/bin/arm-linux-gnueabihf-g++ platform=rpi -marm WITH_DYNAREC=arm
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh bsnes_hd_beta_libretro.so
         zip -9 ../../mupen64plus_next_libretro.so.zip mupen64plus_next_libretro.so
     - name: Create new release
