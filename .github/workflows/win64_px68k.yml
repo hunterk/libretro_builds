@@ -3,9 +3,9 @@ name: px68k-libretro Windows x86_64
 on:
   schedule:
     - cron: '0 2 * * *' # run at 2 AM UTC
-#  watch: # this is a hack that lets repo owners trigger a build by starring
-#    types: [started]
-#    if: github.actor == github.event.repository.owner.login
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Windows:
