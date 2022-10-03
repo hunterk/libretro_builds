@@ -1,4 +1,4 @@
-name: Dolphin-libretro Windows x86_64
+name: PPSSPP-libretro Windows x86_64
 
 on:
   schedule:
@@ -16,22 +16,17 @@ jobs:
     - name: Get latest CMake
       uses: lukka/get-cmake@latest
     - name: Checkout source
-      run: git clone https://github.com/libretro/dolphin.git && cd dolphin && git submodule update --init
-    - name: Build libretro dolphin core
-      working-directory: dolphin
-      run: mkdir build && cd build && cmake.exe -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
-
-    - name: Build the thing
-      working-directory: dolphin/build
-      run: cmake.exe --build . --target dolphin_libretro --config Release
-
+      run: git clone https://github.com/hrydgard/ppsspp.git && cd ppsspp && git submodule update --init
+    - name: Build libretro ppsspp core
+      working-directory: ppsspp/libretro
+      run: make -j8
     - name: Prep for release
       working-directory: dolphin/Binary
-      run: Compress-Archive -CompressionLevel Optimal -Path dolphin_libretro.dll -DestinationPath ..\..\dolphin_libretro.dll.zip
+      run: Compress-Archive -CompressionLevel Optimal -Path ppsspp_libretro.dll -DestinationPath ..\..\ppsspp_libretro.dll.zip
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: Windows_64-bit
-        file: dolphin_libretro.dll.zip
+        file: ppsspp_libretro.dll.zip
         overwrite: true
