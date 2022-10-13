@@ -34,7 +34,7 @@ jobs:
         sed -i '1s;^;#include <climits>\n;' scummvm/base/commandLine.cpp
     - name: Checkout libretro backend source
       run: git clone https://github.com/diablodiab/libretro-scummvm-backend.git && mv libretro-scummvm-backend scummvm/backends/platform/libretro
-    - name: Build libretro core
+    - shell: msys2 {0}
       working-directory: scummvm/backends/platform/libretro/build
       run: |
         make -j8
