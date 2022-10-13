@@ -15,8 +15,13 @@ jobs:
     steps:
     - name: Install needed packages
       run: sudo apt update && sudo apt install wget git build-essential
-    - name: Checkout scummvm source
-      run: git clone https://github.com/libretro/scummvm.git && cd scummvm && git submodule update --init
+    - name: Checkout source
+      run: git clone https://github.com/scummvm/scummvm.git && cd scummvm && git submodule update --init
+    - name: include climits in a couple of files 
+      run: |
+        sed -i '1s;^;#include <climits>\n;' scummvm/engines/stark/console.cpp
+        sed -i '1s;^;#include <climits>\n;' scummvm/common/random.cpp
+        sed -i '1s;^;#include <climits>\n;' scummvm/base/commandLine.cpp
     - name: Checkout libretro backend source
       run: git clone https://github.com/diablodiab/libretro-scummvm-backend.git && mv libretro-scummvm-backend scummvm/backends/platform/libretro
     - name: Build libretro core
