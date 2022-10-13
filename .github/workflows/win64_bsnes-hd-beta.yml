@@ -1,4 +1,4 @@
-name: bsnes-hd-beta libretro Windows x86_64
+name: ScummVM libretro Windows x86_64
 
 on:
   schedule:
@@ -26,16 +26,23 @@ jobs:
           mingw-w64-x86_64-pkg-config
           zip
     - name: Checkout source
-      run: git clone https://github.com/DerKoun/bsnes-hd.git && cd bsnes-hd && git submodule update --init
-    - shell: msys2 {0}
-      working-directory: bsnes-hd/bsnes
+      run: git clone https://github.com/scummvm/scummvm.git && cd scummvm && git submodule update --init
+    - name: include climits in a couple of files 
       run: |
-        make -f GNUmakefile platform=windows target=libretro -j4
-        zip -9 ../../bsnes_hd_beta_libretro.dll.zip out/bsnes_hd_beta_libretro.dll
+        sed -i '1s;^;#include <climits>\n;' scummvm/engines/stark/console.cpp
+        sed -i '1s;^;#include <climits>\n;' scummvm/common/random.cpp
+        sed -i '1s;^;#include <climits>\n;' scummvm/base/commandLine.cpp
+    - name: Checkout libretro backend source
+      run: git clone https://github.com/diablodiab/libretro-scummvm-backend.git && mv libretro-scummvm-backend scummvm/backends/platform/libretro
+    - name: Build libretro core
+      working-directory: scummvm/backends/platform/libretro/build
+      run: |
+        make -j8
+        zip -9 ../../../../../scummvm_libretro.dll.zip scummvm_libretro.dll
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         tag: Windows_64-bit
-        file: bsnes_hd_beta_libretro.dll.zip
+        file: scummvm_libretro.dll.zip
         overwrite: true
