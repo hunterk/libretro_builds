@@ -1,0 +1,41 @@
+name: NeoCD libretro Windows x86_64
+
+on:
+#  schedule:
+#    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          wget
+          git
+          make
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-zlib
+          mingw-w64-x86_64-pkg-config
+          zip
+    - name: Checkout source
+      run: git clone https://github.com/hunterk/neocd_libretro.git && cd neocd_libretro && git submodule update --init
+    - shell: msys2 {0}
+      working-directory: neocd_libretro
+      run: |
+        make -j8
+        zip -9 ../neocd_libretro.dll.zip neocd_libretro.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: neocd_libretro.dll.zip
+        overwrite: true
