@@ -127,7 +127,7 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: working_dir/RetroArch-Win-x86_64-Nightly_Full.7z
-        tag: Windows x86_64
+        tag: Windows_64-bit
         asset_name: RetroArch-Win-x86_64-Nightly_Full.7z
         overwrite: true
     - shell: msys2 {0}
@@ -148,6 +148,6 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: RetroArch/angle/RetroArch-ANGLE-x86_64-Nightly_Add-on.7z
-        tag: Windows x86_64
+        tag: Windows_64-bit
         asset_name: RetroArch-ANGLE-x86_64-Nightly_Add-on.7z
         overwrite: true
