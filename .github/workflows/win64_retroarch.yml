@@ -1,0 +1,153 @@
+
+name: RetroArch Nightly Build
+
+on:
+  schedule:
+  - cron: "0 5 * * *" # build every night at midnight Eastern
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs: 
+  Assets:
+    name: Collect and bundle assets
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - run: |
+        git clone https://github.com/libretro/retroarch-assets.git && mv retroarch-assets assets && rm -rf assets/branding assets/wallpaper/* assets/src assets/.git
+        git clone https://github.com/libretro/common-overlays.git && mv common-overlays overlays && rm -rf overlays/.git
+        git clone https://github.com/libretro/retroarch-joypad-autoconfig.git && mv retroarch-joypad-autoconfig autoconfig && rm -rf autoconfig/.git
+        git clone https://github.com/libretro/libretro-super.git && mv libretro-super/dist/info ./ && rm -rf libretro-super
+        mkdir -p shaders
+    - name: fetch shaders
+      working-directory: shaders
+      run: |
+        git clone https://github.com/libretro/common-shaders.git && mv common-shaders shaders_cg && rm -rf shaders_cg/.git
+        git clone https://github.com/libretro/glsl-shaders.git && mv glsl-shaders shaders_glsl && rm -rf shaders_glsl/.git
+        git clone https://github.com/libretro/slang-shaders.git && mv slang-shaders shaders_slang && rm -rf shaders_slang/.git
+    - run: |
+        git clone https://github.com/libretro/libretro-database.git && mv libretro-database/rdb ./database && mv libretro-database/cht ./cheats && rm -rf libretro-database
+        git clone https://github.com/libretro/RetroArch.git
+        mkdir -p filters/audio && mkdir -p filters/video
+    - name: Build audio filters
+      working-directory: RetroArch/libretro-common/audio/dsp_filters
+      run: make && mv *so ../../../../filters/audio && mv *dsp ../../../../filters/audio
+    - name: Build video filters
+      working-directory: RetroArch/gfx/video_filters
+      run: make && mv *so ../../../filters/video && mv *filt ../../../filters/video
+    - run: rm -rf RetroArch
+    - name: Zip it up!
+      run: 7z a -mx=9 -x'!README.md' -x'!LICENSE' assets.7z *
+    - name: Upload Windows assets bundle
+      uses: actions/upload-artifact@v2
+      with:
+        name: assets.7z
+        path: assets.7z
+            
+  Windows:
+    name: Build RetroArch Nightly Windows
+    needs: Assets
+    runs-on: windows-latest
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          base-devel
+          git
+          wget
+          make
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-ntldd
+          mingw-w64-x86_64-zlib
+          mingw-w64-x86_64-pkg-config
+          mingw-w64-x86_64-SDL2
+          mingw-w64-x86_64-libxml2
+          mingw-w64-x86_64-freetype
+          mingw-w64-x86_64-python3
+          mingw-w64-x86_64-ffmpeg
+          mingw-w64-x86_64-drmingw
+          mingw-w64-x86_64-qt5
+          mingw-w64-x86_64-openssl
+          mingw-w64-x86_64-nvidia-cg-toolkit
+          unzip
+          p7zip
+    - uses: actions/checkout@v2
+    - name: Fetch the source
+      run: git clone https://github.com/hunterk/RetroArch.git
+    - shell: msys2 {0}
+      working-directory: RetroArch
+      run: |
+        ./configure --enable-qt
+        make -j8
+    - name: Setup working dir
+      run: mkdir -p working_dir
+    - name: Gather Qt libs
+      working-directory: RetroArch
+      run: ForEach ($l in $(msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3)){cp "$l" ../working_dir}
+    - name: Gather the other libs
+      working-directory: RetroArch
+      run: ForEach ($l in $(msys2 -c ntldd.exe -R '*.exe'|grep mingw64|sed -e 's/^[ \t]*//'|cut -d' ' -f3)){cp "$l" ../working_dir}   
+    - shell: msys2 {0}
+      working-directory: RetroArch/libretro-common/audio/dsp_filters
+      run: make
+    - shell: msys2 {0}
+      working-directory: RetroArch/gfx/video_filters
+      run: make
+#    - name: Free up some disk space
+#      working-directory: RetroArch
+#      run: rm -rf .git && pacman -Rsu --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-openssl
+    - name: Create debug exe and strip regular exe
+      working-directory: RetroArch
+      run: cp retroarch.exe retroarch_debug.exe && strip.exe -s retroarch.exe
+    - name: Move executables to working dir (libs are already there)
+      working-directory: RetroArch
+      run: mv *.exe ../working_dir
+    - shell: msys2 {0}
+      working-directory: working_dir
+      run: windeployqt --debug --no-patchqt --no-translations retroarch.exe
+    - name: Download assets package from previous job
+      uses: actions/download-artifact@v2
+      with:
+        name: assets.7z
+    - shell: msys2 {0}
+      working-directory: working_dir
+      run: mv ../assets.7z ./ && 7z x assets.7z && rm -rf assets.7z RetroArch-Win-x86_64-Nightly_Update-Pack.7z filters/audio/*.so filters/video/*.so
+    - name: Copy filters to assets dir
+      run: mv RetroArch/libretro-common/audio/dsp_filters/*dll working_dir/filters/audio && mv RetroArch/gfx/video_filters/*dll working_dir/filters/video
+    - name: Zip the full release
+      working-directory: working_dir
+      run: 7z a -mx=9 RetroArch-Win-x86_64-Nightly_Full.7z *
+    - name: Upload RetroArch release bundle
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: working_dir/RetroArch-Win-x86_64-Nightly_Full.7z
+        tag: Windows x86_64
+        asset_name: RetroArch-Win-x86_64-Nightly_Full.7z
+        overwrite: true
+    - shell: msys2 {0}
+      run: rm -rf working_dir && mkdir -p RetroArch/angle
+#    - name: Reinstall necessary packages
+#      run: msys2do pacman -S --noconfirm --disable-download-timeout --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-openssl    
+    - shell: msys2 {0}
+      working-directory: RetroArch
+      run: ./configure --enable-angle --enable-dynamic_egl && make
+    - name: Gather resources
+      working-directory: RetroArch/angle
+      run: mv ../retroarch_angle.exe ./ && mv ../pkg/windows/x86_64/libEGL.dll ./ && mv ../pkg/windows/x86_64/libGLESv2.dll ./
+    - name: Zip the ANGLE bundle
+      working-directory: RetroArch/angle
+      run: 7z a -mx=9 RetroArch-ANGLE-x86_64-Nightly_Add-on.7z *
+    - name: Upload ANGLE release bundle
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: RetroArch/angle/RetroArch-ANGLE-x86_64-Nightly_Add-on.7z
+        tag: Windows x86_64
+        asset_name: RetroArch-ANGLE-x86_64-Nightly_Add-on.7z
+        overwrite: true
