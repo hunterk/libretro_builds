@@ -14,9 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: clean the workspace
-      run: rm -rf *
-    - uses: actions/checkout@v2
     - run: |
         git clone https://github.com/libretro/retroarch-assets.git && mv retroarch-assets assets && rm -rf assets/branding assets/wallpaper/* assets/src assets/.git
         git clone https://github.com/libretro/common-overlays.git && mv common-overlays overlays && rm -rf overlays/.git
@@ -81,7 +78,6 @@ jobs:
           mingw-w64-x86_64-nvidia-cg-toolkit
           unzip
           p7zip
-    - uses: actions/checkout@v2
     - name: Fetch the source
       run: git clone https://github.com/hunterk/RetroArch.git
     - shell: msys2 {0}
@@ -92,11 +88,15 @@ jobs:
     - name: Setup working dir
       run: mkdir -p working_dir
     - name: Gather Qt libs
+      shell: pwsh
       working-directory: RetroArch
-      run: ForEach ($l in $(msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3)){cp "$l" ../working_dir}
+      run: ForEach ($l in $(msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3)){cp "$l" ../working_dir/}
+    - name: dependency debugging
+      run: msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3 >> ../working_dir/deplist.txt && msys2 -c ntldd.exe -R '*.exe'|grep mingw64|sed -e 's/^[ \t]*//'|cut -d' ' -f3 >> ../working_dir/deplist.txt
     - name: Gather the other libs
       working-directory: RetroArch
-      run: ForEach ($l in $(msys2 -c ntldd.exe -R '*.exe'|grep mingw64|sed -e 's/^[ \t]*//'|cut -d' ' -f3)){cp "$l" ../working_dir}   
+      shell: pwsh
+      run: ForEach ($l in $(msys2 -c ntldd.exe -R '*.exe'|grep mingw64|sed -e 's/^[ \t]*//'|cut -d' ' -f3)){cp "$l" ../working_dir/}   
     - shell: msys2 {0}
       working-directory: RetroArch/libretro-common/audio/dsp_filters
       run: make
@@ -106,9 +106,9 @@ jobs:
 #    - name: Free up some disk space
 #      working-directory: RetroArch
 #      run: rm -rf .git && pacman -Rsu --noconfirm mingw-w64-x86_64-toolchain mingw-w64-x86_64-openssl
-    - name: Create debug exe and strip regular exe
+    - name: strip exe
       working-directory: RetroArch
-      run: cp retroarch.exe retroarch_debug.exe && strip.exe -s retroarch.exe
+      run: strip.exe -s retroarch.exe
     - name: Move executables to working dir (libs are already there)
       working-directory: RetroArch
       run: mv *.exe ../working_dir
