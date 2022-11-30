@@ -92,9 +92,10 @@ jobs:
       working-directory: RetroArch
       run: ForEach ($l in $(msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3)){cp "$l" ../working_dir/}
     - name: dependency debugging
+      shell: msys2 {0}
       working-directory: RetroArch
 #      run: msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3 > ../working_dir/deplist.txt && msys2 -c ntldd.exe -R '*.exe'|grep mingw64|sed -e 's/^[ \t]*//'|cut -d' ' -f3 >> ../working_dir/deplist.txt
-      run: ntldd.exe -R 'imageformats/*dll' > ..\working_dir\deplist.txt
+      run: ntldd.exe -R 'imageformats/*dll' > ../working_dir/deplist.txt
     - name: Gather the other libs
       working-directory: RetroArch
       shell: pwsh
