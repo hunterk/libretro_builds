@@ -94,7 +94,8 @@ jobs:
     - name: dependency debugging
       working-directory: RetroArch
       shell: pwsh
-      run: msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3 > ../working_dir/deplist.txt && msys2 -c ntldd.exe -R '*.exe'|grep mingw64|sed -e 's/^[ \t]*//'|cut -d' ' -f3 >> ../working_dir/deplist.txt
+#      run: msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 | sed -e 's/^[ \t]*//'|cut -d' ' -f3 > ../working_dir/deplist.txt && msys2 -c ntldd.exe -R '*.exe'|grep mingw64|sed -e 's/^[ \t]*//'|cut -d' ' -f3 >> ../working_dir/deplist.txt
+      run: msys2 -c ntldd.exe -R 'imageformats/*dll' | grep mingw64 > ../working_dir/deplist.txt
     - name: Gather the other libs
       working-directory: RetroArch
       shell: pwsh
