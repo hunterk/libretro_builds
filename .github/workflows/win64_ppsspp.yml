@@ -27,10 +27,8 @@ jobs:
           zip
     - name: Checkout source
       run: git clone https://github.com/hunterk/ppsspp.git && cd ppsspp && git submodule update --init --recursive
-    - name: prep the build
-      run: cd ppsspp\libretro
-    - shell: msys2 {0}
-      working-directory: ppsspp/libretro
+    - name: build the thing
+      working-directory: ppsspp\libretro
       run: make platform=windows_msvc2019_desktop_x64 -j8
     - name: Prep for release
       working-directory: ppsspp\libretro
