@@ -13,14 +13,24 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Install needed packages
-      run: sudo apt install wget git build-essential mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          wget
+          git
+          make
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-zlib
+          mingw-w64-x86_64-pkg-config
+          zip
     - name: Checkout source
       run: git clone https://github.com/hunterk/ppsspp.git && cd ppsspp && git submodule update --init --recursive
     - name: prep the build
       run: cd ppsspp\libretro
-    - name: build the thing
-      working-directory: ppsspp\libretro
+    - shell: msys2 {0}
+      working-directory: ppsspp/libretro
       run: make platform=windows_msvc2019_desktop_x64 -j8
     - name: Prep for release
       working-directory: ppsspp\libretro
