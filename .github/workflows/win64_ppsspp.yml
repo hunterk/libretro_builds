@@ -20,6 +20,7 @@ jobs:
     - name: Build libretro ppsspp core
     - name: prep the build
       run: cd ppsspp && mkdir build && cd build && cmake .. -DLIBRETRO=ON
+    - name: build the thing
       working-directory: ppsspp/build
       run: make -j8
     - name: Prep for release
