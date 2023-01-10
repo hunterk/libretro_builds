@@ -1,0 +1,35 @@
+name: hunterk PPSSPP-libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows
+    runs-on: windows-latest
+
+    steps:
+    - name: Get latest CMake
+      uses: lukka/get-cmake@latest
+    - name: Checkout source
+      run: git clone https://github.com/hunterk/ppsspp.git && cd ppsspp && git submodule update --init --recursive
+    - name: Build libretro ppsspp core
+    - name: prep the build
+      run: cd ppsspp && mkdir build && cd build && cmake .. -DLIBRETRO=ON
+    - name: build the thing
+      working-directory: ppsspp/build
+      run: make -j8
+    - name: Prep for release
+      working-directory: ppsspp/build/lib
+      run: Compress-Archive -CompressionLevel Optimal -Path ppsspp_libretro.dll -DestinationPath ..\..\..\ppsspp_libretro.dll.zip
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: ppsspp_libretro.dll.zip
+        overwrite: true
