@@ -13,19 +13,18 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Get latest CMake
-      uses: lukka/get-cmake@latest
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools
     - name: Checkout source
       run: git clone https://github.com/hunterk/ppsspp.git && cd ppsspp && git submodule update --init --recursive
-    - name: Build libretro ppsspp core
     - name: prep the build
-      run: cd ppsspp && mkdir build && cd build && cmake .. -DLIBRETRO=ON
+      run: cd ppsspp\libretro
     - name: build the thing
-      working-directory: ppsspp/build
-      run: make -j8
+      working-directory: ppsspp\libretro
+      run: make platform=windows_msvc2019_desktop_x64 -j8
     - name: Prep for release
-      working-directory: ppsspp/build/lib
-      run: Compress-Archive -CompressionLevel Optimal -Path ppsspp_libretro.dll -DestinationPath ..\..\..\ppsspp_libretro.dll.zip
+      working-directory: ppsspp\libretro
+      run: Compress-Archive -CompressionLevel Optimal -Path ppsspp_libretro.dll -DestinationPath ..\..\ppsspp_libretro.dll.zip
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
