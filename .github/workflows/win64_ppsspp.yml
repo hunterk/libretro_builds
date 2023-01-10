@@ -16,13 +16,15 @@ jobs:
     - name: Get latest CMake
       uses: lukka/get-cmake@latest
     - name: Checkout source
-      run: git clone https://github.com/hrydgard/ppsspp.git && cd ppsspp && git submodule update --init
+      run: git clone https://github.com/hunterk/ppsspp.git && cd ppsspp && git submodule update --init --recursive
     - name: Build libretro ppsspp core
-      working-directory: ppsspp/libretro
+    - name: prep the build
+      run: cd ppsspp && mkdir build && cd build && cmake .. -DLIBRETRO=ON
+      working-directory: ppsspp/build
       run: make -j8
     - name: Prep for release
-      working-directory: dolphin/Binary
-      run: Compress-Archive -CompressionLevel Optimal -Path ppsspp_libretro.dll -DestinationPath ..\..\ppsspp_libretro.dll.zip
+      working-directory: ppsspp/build/lib
+      run: Compress-Archive -CompressionLevel Optimal -Path ppsspp_libretro.dll -DestinationPath ..\..\..\ppsspp_libretro.dll.zip
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
