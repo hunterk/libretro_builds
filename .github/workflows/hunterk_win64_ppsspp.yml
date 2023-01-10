@@ -17,7 +17,6 @@ jobs:
       uses: lukka/get-cmake@latest
     - name: Checkout source
       run: git clone https://github.com/hunterk/ppsspp.git && cd ppsspp && git submodule update --init --recursive
-    - name: Build libretro ppsspp core
     - name: prep the build
       run: cd ppsspp && mkdir build && cd build && cmake .. -DLIBRETRO=ON
     - name: build the thing
