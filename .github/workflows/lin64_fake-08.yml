@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt install wget git build-essential libgl1-mesa-dev
+      run: sudo apt install wget git build-essential libgl1-mesa-dev libaio-dev
     - name: Checkout source
       run: git clone https://github.com/jtothebell/fake-08.git && cd fake-08 && git submodule update --init
     - name: Build libretro core
