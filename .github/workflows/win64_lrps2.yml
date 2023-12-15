@@ -30,6 +30,7 @@ jobs:
           mingw-w64-x86_64-glew
           mingw-w64-x86_64-mesa
           mingw-w64-x86_64-crt-git
+          mingw-w64-x86_64-glfw
           zip
     - name: Checkout source
       run: git clone https://github.com/libretro/pcsx2.git && cd pcsx2 && git checkout libretro && git submodule update --init --recursive
