@@ -27,7 +27,7 @@ jobs:
           mingw-w64-x86_64-pkg-config
           mingw-w64-x86_64-libpcap
           mingw-w64-x86_64-freeglut
-          mingw-w64-x86_64-glew
+          mingw-w64-x86_64-glbinding
           mingw-w64-x86_64-mesa
           mingw-w64-x86_64-crt-git
           mingw-w64-x86_64-glfw
