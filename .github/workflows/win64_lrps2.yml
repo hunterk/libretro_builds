@@ -1,0 +1,43 @@
+name: LRPS2 libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows
+    runs-on: windows-latest
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          wget
+          git
+          make
+          cmake
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-zlib
+          mingw-w64-x86_64-pkg-config
+          zip
+    - name: Checkout source
+      run: git clone https://github.com/libretro/pcsx2.git && cd pcsx2 && git checkout libretro && git submodule update --init --recursive
+    - shell: msys2 {0}
+      working-directory: pcsx2
+      run: mkdir build && cd build && cmake .. -DLIBRETRO=ON && make -j8
+    - name: Prep for release
+      working-directory: pcsx2/build/bin
+      run: zip -9 ..\..\..\pcsx2_libretro.dll.zip pcsx2_libretro.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: pcsx2_libretro.dll.zip
+        overwrite: true
