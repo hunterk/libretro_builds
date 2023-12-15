@@ -25,6 +25,7 @@ jobs:
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-zlib
           mingw-w64-x86_64-pkg-config
+          mingw-w64-x86_64-libpcap
           zip
     - name: Checkout source
       run: git clone https://github.com/libretro/pcsx2.git && cd pcsx2 && git checkout libretro && git submodule update --init --recursive
