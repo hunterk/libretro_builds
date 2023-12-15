@@ -28,6 +28,7 @@ jobs:
           mingw-w64-x86_64-libpcap
           mingw-w64-x86_64-freeglut
           mingw-w64-x86_64-glew
+          mingw-w64-x86_64-mesa
           zip
     - name: Checkout source
       run: git clone https://github.com/libretro/pcsx2.git && cd pcsx2 && git checkout libretro && git submodule update --init --recursive
