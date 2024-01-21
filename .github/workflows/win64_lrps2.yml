@@ -13,30 +13,12 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: >-
-          wget
-          git
-          make
-          cmake
-          mingw-w64-x86_64-binutils
-          mingw-w64-x86_64-toolchain
-          mingw-w64-x86_64-zlib
-          mingw-w64-x86_64-pkg-config
-          mingw-w64-x86_64-libpcap
-          mingw-w64-x86_64-freeglut
-          mingw-w64-x86_64-glbinding
-          mingw-w64-x86_64-mesa
-          mingw-w64-x86_64-crt-git
-          mingw-w64-x86_64-glfw
-          zip
+    - uses: ilammy/msvc-dev-cmd@v1.4.1
     - name: Checkout source
       run: git clone https://github.com/libretro/pcsx2.git && cd pcsx2 && git checkout libretro && git submodule update --init --recursive
-    - shell: msys2 {0}
+    - name: compile the thing
       working-directory: pcsx2
-      run: mkdir build && cd build && cmake .. -DLIBRETRO=ON && make -j8
+      run: mkdir build && cd build && cmake .. -DLIBRETRO=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_LINK_WHAT_YOU_USE=TRUE && make -j8
     - name: Prep for release
       working-directory: pcsx2/build/bin
       run: zip -9 ..\..\..\pcsx2_libretro.dll.zip pcsx2_libretro.dll
