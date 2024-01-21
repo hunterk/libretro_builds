@@ -20,8 +20,8 @@ jobs:
       working-directory: pcsx2
       run: mkdir build && cd build && cmake .. -DLIBRETRO=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_LINK_WHAT_YOU_USE=TRUE && dir && msbuild ALL_BUILD.vcxproj
     - name: Prep for release
-      working-directory: pcsx2/build/bin
-      run: zip -9 ..\..\..\pcsx2_libretro.dll.zip pcsx2_libretro.dll
+      working-directory: pcsx2\build\libretro\DEBUG
+      run: zip -9 ..\..\..\..\pcsx2_libretro.dll.zip pcsx2_libretro.dll
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
