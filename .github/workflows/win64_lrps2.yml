@@ -18,7 +18,7 @@ jobs:
       run: git clone https://github.com/libretro/pcsx2.git && cd pcsx2 && git checkout libretro && git submodule update --init --recursive
     - name: compile the thing
       working-directory: pcsx2
-      run: mkdir build && cd build && cmake .. -DLIBRETRO=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_LINK_WHAT_YOU_USE=TRUE && dir && make -j8
+      run: mkdir build && cd build && cmake .. -DLIBRETRO=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_LINK_WHAT_YOU_USE=TRUE && dir && msbuild ALL_BUILD.vcxproj
     - name: Prep for release
       working-directory: pcsx2/build/bin
       run: zip -9 ..\..\..\pcsx2_libretro.dll.zip pcsx2_libretro.dll
