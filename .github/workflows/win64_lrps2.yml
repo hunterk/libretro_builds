@@ -19,6 +19,9 @@ jobs:
     - name: compile the thing
       working-directory: pcsx2
       run: mkdir build && cd build && cmake .. -DLIBRETRO=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_LINK_WHAT_YOU_USE=TRUE && dir && msbuild ALL_BUILD.vcxproj
+    - name: check dependencies
+      working-directory: pcsx2\build\libretro\DEBUG
+      run: dumpbin /dependents pcsx2_libretro.dll
     - name: Prep for release
       working-directory: pcsx2\build\libretro\DEBUG
       run: Compress-Archive -CompressionLevel Optimal -Path pcsx2_libretro.dll -DestinationPath ..\..\..\..\pcsx2_libretro.dll.zip
