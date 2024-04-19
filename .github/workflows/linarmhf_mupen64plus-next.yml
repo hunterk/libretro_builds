@@ -10,7 +10,7 @@ on:
 jobs:
   Linux:
     name: Build for Linux
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - name: add foreign arch
@@ -39,7 +39,7 @@ jobs:
       working-directory: mupen64plus-libretro-nx
       run: |
         make -j8 CC=/usr/bin/arm-linux-gnueabihf-gcc CXX=/usr/bin/arm-linux-gnueabihf-g++ platform=rpi CXXFLAGS='-marm' WITH_DYNAREC=arm
-        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh bsnes_hd_beta_libretro.so
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && mv out/* ./ && ./retrolink.sh mupen64plus_next_libretro.so
         zip -9 ../../mupen64plus_next_libretro.so.zip mupen64plus_next_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
