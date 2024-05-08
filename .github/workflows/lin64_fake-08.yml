@@ -21,7 +21,7 @@ jobs:
       working-directory: fake-08/platform/libretro
       run: |
         make -j8
-        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh gw_libretro.so
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh fake08_libretro.so
         zip -9 ../../../fake08_libretro.so.zip fake08_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
