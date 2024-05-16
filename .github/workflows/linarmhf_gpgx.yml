@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: Genesis-Plus-GX
       run: |
-        make -f Makefile.libretro -j8 CC=/usr/bin/aarch64-linux-gnu-gcc CXX=/usr/bin/aarch64-linux-gnu-g++
+        make -f Makefile.libretro -j8 CC=/usr/bin/arm-linux-gnueabihf-gcc CXX=/usr/bin/arm-linux-gnueabihf-g++
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh genesis_plus_gx_libretro.so
         zip -9 ../genesis_plus_gx_libretro.so.zip genesis_plus_gx_libretro.so
     - name: Create new release
