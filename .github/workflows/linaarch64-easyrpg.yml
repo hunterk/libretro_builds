@@ -32,7 +32,7 @@ jobs:
         echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
         echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-backports main restricted universe multiverse"  | sudo tee -a /etc/apt/sources.list
     - name: Install needed packages
-      run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 gcc:amd64 make:amd64 g++-aarch64-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:arm64 libsdl2-dev:arm64 libibus-1.0-dev:arm64 libpulse-dev:arm64 gir1.2-ibus-1.0:arm64 libglib2.0-dev:arm64 libibus-1.0-5:arm64 libpulse-mainloop-glib0:arm64 libglib2.0-dev:arm64 libxext-dev:arm64
+      run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 gcc:amd64 make:amd64 g++-aarch64-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:arm64 libsdl2-dev:arm64 libibus-1.0-dev:arm64 libpulse-dev:arm64 gir1.2-ibus-1.0:arm64 libglib2.0-dev:arm64 libibus-1.0-5:arm64 libpulse-mainloop-glib0:arm64 gir1.2-glib-2.0:arm64 libglib2.0-0:arm64 libmount-dev:arm64 libselinux1-dev:arm64 libglib2.0-dev:arm64 libxext-dev:arm64
     - name: Checkout source
       run: git clone https://github.com/EasyRPG/Player.git && cd Player && git submodule update --init
     - name: Build libretro core
