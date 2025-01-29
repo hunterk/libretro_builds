@@ -38,7 +38,7 @@ jobs:
     - name: Build libretro core
       working-directory: Player
       run: |
-        mkdir build && cd build && cmake -DCMAKE_CXX_COMPILER=/usr/bin/aarch64-linux-gnu-g++ -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc && cmake --build .
+        mkdir build && cd build && cmake -DCMAKE_CXX_COMPILER=/usr/bin/aarch64-linux-gnu-g++ -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc .. && cmake --build .
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh easyrpg_libretro.so
         zip -9 ../../easyrpg_libretro.so.zip easyrpg_libretro.so
     - name: Create new release
