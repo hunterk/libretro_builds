@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt update && sudo apt install wget git make automake pkg-config libtool build-essential libsdl2-dev libicu-dev libexpat1-dev libinih-dev libinih1 libfmt-dev libfmt9
+      run: sudo apt update && sudo apt install wget git make automake pkg-config libtool build-essential libsdl2-dev libicu-dev libexpat1-dev libinih-dev libinih1 libfmt-dev
     - name: Checkout source
       run: git clone https://github.com/EasyRPG/Player.git && cd Player && git submodule update --init
     - name: Build libretro core
