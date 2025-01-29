@@ -20,7 +20,7 @@ jobs:
     - name: Build libretro core
       working-directory: Player
       run: |
-        mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=ON -DPLAYER_TARGET_PLATFORM=libretro -DPLAYER_BUILD_LIBLCF=ON -DCMAKE_IGNORE_PATH=/usr/include -DCMAKE_BUILD_TYPE=Release .. && cmake --build .
+        mkdir build && cd build && cmake -DBUILD_SHARED_LIBS=ON -DPLAYER_TARGET_PLATFORM=libretro -DPLAYER_BUILD_LIBLCF=ON -DCMAKE_BUILD_TYPE=Release .. && cmake --build .
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh easyrpg_libretro.so
         zip -9 ../../easyrpg_libretro.so.zip easyrpg_libretro.so
     - name: Create new release
