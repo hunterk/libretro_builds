@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt update && sudo apt install wget git build-essential make libx11-dev libxext-dev
+      run: sudo apt update && sudo apt install wget git build-essential make libx11-dev libxext-dev libpcap-dev
     - name: Checkout source
       run: git clone https://github.com/libretro/desmume.git && cd desmume && git submodule update --init
     - name: Build libretro desmume core
