@@ -14,13 +14,13 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt update && sudo apt install wget git build-essential make yasm libx11-dev libxext-dev glslang-dev libbluetooth-dev libgl1-mesa-dev libxi-dev x11-utils libxrandr-dev libpthread-stubs0-dev
+      run: sudo apt update && sudo apt install wget git build-essential cmake gcc-11 g++-11 make yasm libx11-dev libxext-dev glslang-dev libbluetooth-dev libgl1-mesa-dev libxi-dev x11-utils libxrandr-dev libpthread-stubs0-dev
     - name: Checkout source
       run: git clone https://github.com/libretro/citra.git && cd citra && git submodule update --init --recursive
     - name: Build libretro core
       working-directory: citra
       run: |
-        make -j8 platform=unix ARCH=aarch64 HAVE_DYNARMIC=1 HAVE_FFMPEG_STATIC=1
+        mkdir build && cd build && cmake -DCMAKE_C_COMPILER=gcc-11 -DCMAKE_CXX_COMPILER=g++-11 -DENABLE_TESTS=OFF -DENABLE_DEDICATED_ROOM=OFF -DENABLE_SDL2=OFF -DENABLE_QT=OFF -DENABLE_WEB_SERVICE=OFF -DENABLE_SCRIPTING=OFF -DENABLE_OPENAL=OFF -DENABLE_LIBUSB=OFF -DCITRA_ENABLE_BUNDLE_TARGET=OFF -DCITRA_WARNINGS_AS_ERRORS=OFF .. && make -j8 platform=unix ARCH=aarch64 HAVE_DYNARMIC=1 HAVE_FFMPEG_STATIC=1 
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh citra_libretro.so
         zip -9 ../citra_libretro.so.zip citra_libretro.so
     - name: Create new release
