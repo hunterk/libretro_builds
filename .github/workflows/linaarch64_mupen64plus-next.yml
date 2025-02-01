@@ -16,11 +16,11 @@ jobs:
     - name: Install needed packages
       run: sudo apt update && sudo apt install wget git build-essential make libx11-dev libgles2-mesa-dev libegl-dev libxext-dev
     - name: Checkout source
-      run: git clone https://github.com/libretro/mupen64plus-libretro-nx.git && cd mupen64plus-libretro-nx && git submodule update --init
+      run: git clone https://github.com/libretro/mupen64plus-libretro-nx.git && cd mupen64plus-libretro-nx
     - name: Build libretro core
       working-directory: mupen64plus-libretro-nx
       run: |
-        make -j8 platform=arm64_cortex_a53_gles2 ARCH=aarch64
+        make -j8 GLES3=1
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh mupen64plus_next_libretro.so
         zip -9 ../mupen64plus_next_libretro.so.zip mupen64plus_next_libretro.so
     - name: Create new release
