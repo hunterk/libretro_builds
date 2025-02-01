@@ -20,7 +20,7 @@ jobs:
     - name: Build libretro desmume core
       working-directory: desmume/desmume/src/frontend/libretro
       run: |
-        make -f Makefile.libretro -j8
+        make -f Makefile.libretro -j8 platform=unix arch=arm64
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh desmume_libretro.so
         zip -9 ../../../../../desmume_libretro.so.zip desmume_libretro.so
     - name: Create new release
