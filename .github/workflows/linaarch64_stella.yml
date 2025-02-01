@@ -18,11 +18,11 @@ jobs:
     - name: Checkout source
       run: git clone https://github.com/stella-emu/stella.git && cd stella && git submodule update --init
     - name: Build libretro core
-      working-directory: stella/src/libretro
+      working-directory: stella/src/os/libretro
       run: |
         make -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh stella_libretro.so
-        zip -9 ../../../stella_libretro.so.zip stella_libretro.so
+        zip -9 ../../../../stella_libretro.so.zip stella_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
