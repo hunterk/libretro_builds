@@ -10,35 +10,17 @@ on:
 jobs:
   Linux:
     name: Build for Linux
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04-arm
 
     steps:
-    - name: add foreign arch
-      run: |
-        sudo dpkg --add-architecture arm64
-        sudo rm -rf /etc/apt/sources.list
-        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal main restricted" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-updates main restricted" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal universe" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-updates universe" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal multiverse" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=amd64] http://us.archive.ubuntu.com/ubuntu focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal main restricted" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates main restricted" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal universe" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates universe" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal multiverse" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-updates multiverse" | sudo tee -a /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports focal-backports main restricted universe multiverse"  | sudo tee -a /etc/apt/sources.list
     - name: Install needed packages
-      run: sudo apt update && sudo apt install wget:amd64 git:amd64 build-essential:amd64 cmake:amd64 gcc:amd64 make:amd64 g++-aarch64-linux-gnu:amd64 gcc-aarch64-linux-gnu:amd64 binutils-aarch64-linux-gnu:amd64 libx11-dev:arm64 libvulkan-dev:arm64 libvulkan1:arm64 libgles2-mesa-dev:arm64 libegl-dev:arm64 libxext-dev:arm64
+      run: sudo apt update && sudo apt install wget git build-essential cmake make libx11-dev libvulkan-dev libvulkan1 libgles2-mesa-dev libegl-dev libxext-dev
     - name: Checkout source
       run: git clone https://github.com/libretro/swanstation.git && cd swanstation && git submodule update --init
     - name: Build libretro core
       working-directory: swanstation
       run: |
-        mkdir build && cd build && cmake .. -DCMAKE_C_COMPILER=/usr/bin/aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=/usr/bin/aarch64-linux-gnu-g++ -DUSE_EGL=ON -DCMAKE_SYSTEM_PROCESSOR=aarch64
+        mkdir build && cd build && cmake .. -DUSE_EGL=ON -DCMAKE_SYSTEM_PROCESSOR=aarch64
         make -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh swanstation_libretro.so
         zip -9 ../../swanstation_libretro.so.zip swanstation_libretro.so
