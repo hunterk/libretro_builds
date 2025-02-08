@@ -22,7 +22,7 @@ jobs:
       run: |
         make -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh nestopia_libretro.so
-        zip -9 ../nestopia_libretro.so.zip nestopia_libretro.so
+        zip -9 ../../nestopia_libretro.so.zip nestopia_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
       with:
