@@ -1,0 +1,32 @@
+name: Doukutsu_RS libretro Linux aarch64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Linux:
+    name: Build for Linux
+    runs-on: ubuntu-22.04-arm
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt update && sudo apt install wget git build-essential make libx11-dev libxext-dev
+    - name: Checkout source
+      run: git clone https://github.com/DrGlaucous/doukutsu-rs-libretro.git
+    - name: Build libretro core
+      working-directory: doukutsu-rs-libretro
+      run: |
+        make
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh target/release/doukutsu_rs_libretro.so
+        zip -9 ../doukutsu_rs_libretro.so.zip target/release/doukutsu_rs_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_aarch64
+        file: doukutsu_rs_libretro.so.zip
+        overwrite: true
