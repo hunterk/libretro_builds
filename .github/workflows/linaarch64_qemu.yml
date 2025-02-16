@@ -20,7 +20,6 @@ jobs:
     - name: Build libretro core
       working-directory: qemu-libretro
       run: |
-        sudo pip install --break-system-pacakges tomli
         sudo make -f Makefile.libretro-gitlab platform=unix -j8
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh qemu_libretro.so
         zip -9 ../qemu_libretro.so.zip qemu_libretro.so
