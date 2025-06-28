@@ -1,0 +1,32 @@
+name: ParaLLEl-N64 Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows via cross-compile
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential docker.io
+    - name: Checkout source
+      run: git clone https://gitlab.com/parallel-launcher/parallel-n64.git && cd parallel-n64 && git submodule update --init
+    - name: Build libretro core
+      working-directory: parallel-n64
+      run: |
+        ./scripts/build-win64-docker.sh
+        strip -s parallel_n64_libretro.dll
+        zip -9 ../parallel_n64_libretro.dll.zip parallel_n64_libretro.dll
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: parallel_n64_libretro.dll.zip
+        overwrite: true
