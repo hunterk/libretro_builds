@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt install wget git build-essential docker.io
+      run: sudo apt install wget git build-essential
     - name: Checkout source
       run: git clone https://gitlab.com/parallel-launcher/parallel-n64.git && cd parallel-n64 && git submodule update --init
     - name: Build libretro core
