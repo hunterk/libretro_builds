@@ -1,0 +1,32 @@
+name: DICE libretro Linux aarch64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Linux:
+    name: Build for Linux
+    runs-on: ubuntu-22.04-arm
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt update && sudo apt install wget git build-essential make libx11-dev libxext-dev
+    - name: Checkout source
+      run: git clone https://github.com/mittonk/dice-libretro.git && cd dice-libretro && git submodule update --init
+    - name: Build libretro core
+      working-directory: dice-libretro
+      run: |
+        make -f Makefile.libretro -j8
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh dice_libretro.so
+        zip -9 ../dice_libretro.so.zip dice_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_aarch64
+        file: dice_libretro.so.zip
+        overwrite: true
