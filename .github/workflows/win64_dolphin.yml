@@ -16,17 +16,17 @@ jobs:
     - name: Get latest CMake
       uses: lukka/get-cmake@latest
     - name: Checkout source
-      run: git clone https://github.com/libretro/dolphin.git && cd dolphin && git submodule update --init
+      run: git clone https://github.com/jonian/libretro-dolphin.git && cd libretro-dolphin && git submodule update --init
     - name: Build libretro dolphin core
-      working-directory: dolphin
+      working-directory: libretro-dolphin
       run: mkdir build && cd build && cmake.exe -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
 
     - name: Build the thing
-      working-directory: dolphin/build
+      working-directory: libretro-dolphin/build
       run: cmake.exe --build . --target dolphin_libretro --config Release
 
     - name: Prep for release
-      working-directory: dolphin/Binary
+      working-directory: libretro-dolphin/Binary
       run: Compress-Archive -CompressionLevel Optimal -Path dolphin_libretro.dll -DestinationPath ..\..\dolphin_libretro.dll.zip
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
