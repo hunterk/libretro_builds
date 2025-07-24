@@ -16,16 +16,16 @@ jobs:
     - name: Install needed packages
       run: sudo apt update && sudo apt install wget git build-essential make yasm libx11-dev libxext-dev libbluetooth-dev libusb-1.0-0-dev libgl1-mesa-dev libxi-dev x11-utils libxrandr-dev libpthread-stubs0-dev
     - name: Checkout source
-      run: git clone https://github.com/libretro/dolphin.git && cd dolphin && git submodule update --init
+      run: git clone https://github.com/jonian/libretro-dolphin.git && cd libretro-dolphin && git submodule update --init
     - name: prepare to build libretro dolphin core
-      working-directory: dolphin
+      working-directory: libretro-dolphin
       run: mkdir build && cd build && cmake -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
     - name: Build the thing
-      working-directory: dolphin/build
+      working-directory: libretro-dolphin/build
       run: cmake --build . --target dolphin_libretro --config Release
 
     - name: Prep for release
-      working-directory: dolphin/build
+      working-directory: libretro-dolphin/build
       run: |
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh dolphin_libretro.so
         zip -9 ../../dolphin_libretro.so.zip dolphin_libretro.so
