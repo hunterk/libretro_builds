@@ -10,11 +10,14 @@ on:
 jobs:
   Windows:
     name: Build for Windows
-    runs-on: windows-latest
-
+    runs-on: windows-2022
+    
     steps:
-    - name: make sure the MSVC environment is complete
-      uses: microsoft/setup-msbuild@v2
+    - uses: actions/checkout@v4
+    - name: Setup MSVC Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Check Compiler Version
+      run: cl.exe
     - name: Get latest CMake
       uses: ssrobins/install-cmake@v1
     - name: Checkout source
