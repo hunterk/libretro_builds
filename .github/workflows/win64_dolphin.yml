@@ -13,6 +13,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: make sure the MSVC environment is complete
+      uses: microsoft/setup-msbuild@v2
     - name: Get latest CMake
       uses: ssrobins/install-cmake@v1
     - name: Checkout source
