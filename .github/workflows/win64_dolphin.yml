@@ -21,7 +21,7 @@ jobs:
     - name: Get latest CMake
       uses: ssrobins/install-cmake@v1
     - name: Checkout source
-      run: git clone https://github.com/jonian/libretro-dolphin.git && cd libretro-dolphin && git submodule update --init
+      run: git clone --single-branch --branch testing https://github.com/jonian/libretro-dolphin.git && cd libretro-dolphin && git submodule update --init
     - name: Build libretro dolphin core
       working-directory: libretro-dolphin
       run: mkdir build && cd build && cmake.exe -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_POLICY_VERSION_MINIMUM="3.5" -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
