@@ -16,7 +16,7 @@ jobs:
     - name: Install needed packages
       run: sudo apt install wget git build-essential libbluetooth-dev libgl1-mesa-dev libxi-dev x11-utils libx11-dev libxext-dev libxrandr-dev libusb-1.0-0-dev
     - name: Checkout source
-      run: git clone https://github.com/jonian/libretro-dolphin.git && cd libretro-dolphin && git submodule update --init
+      run: git clone --single-branch --branch testing https://github.com/jonian/libretro-dolphin.git && cd libretro-dolphin && git submodule update --init
     - name: Build libretro dolphin core
       working-directory: libretro-dolphin
       run: mkdir build && cd build && cmake -DLIBRETRO=ON -DENABLE_QT=0 -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE=ON ..
