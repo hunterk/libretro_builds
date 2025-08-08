@@ -18,6 +18,8 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
     - name: Setup Windows SDK 10.0.22621
       uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
+      with:
+        sdk-version: 22621
     - name: Check Compiler Version
       run: cl.exe
     - name: Get latest CMake
