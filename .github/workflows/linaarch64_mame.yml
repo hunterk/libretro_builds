@@ -11,11 +11,11 @@ jobs:
   Linux:
     name: Build for Linux
     runs-on: ubuntu-22.04-arm
-    container: quay.io/pypa/manylinux2014_aarch64
+#    container: quay.io/pypa/manylinux2014_aarch64
     
     steps:
-#    - name: Install needed packages
-#      run: sudo apt update && sudo apt install wget git build-essential make libx11-dev libxext-dev gcc-12 g++-12
+    - name: Install needed packages
+      run: sudo apt update && sudo apt install wget git build-essential make libx11-dev libxext-dev gcc-12 g++-12
     - name: Checkout source
       run: git clone https://github.com/libretro/mame.git && cd mame && git submodule update --init
     - name: Build libretro core
