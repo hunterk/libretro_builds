@@ -11,6 +11,7 @@ jobs:
   Linux:
     name: Build for Linux
     runs-on: ubuntu-22.04-arm
+    container: quay.io/pypa/manylinux2014_aarch64
     
     steps:
     - name: Install needed packages
