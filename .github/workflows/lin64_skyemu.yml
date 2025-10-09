@@ -1,0 +1,35 @@
+name: SkyEmu libretro Linux x86_64
+
+on:
+#  schedule:
+#    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Linux:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install needed packages
+      run: sudo apt install wget git build-essential cmake
+    - name: Checkout source
+      run: git clone https://github.com/skylersaleh/SkyEmu.git && cd SkyEmu && git submodule update --init --recursive
+    - name: Build libretro core
+      working-directory: SkyEmu
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make skyemu_libretro
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh skyemu_libretro.so
+        zip -9 ../../skyemu_libretro.so.zip skyemu_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_64-bit
+        file: skyemu_libretro.so.zip
+        overwrite: true
