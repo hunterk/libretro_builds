@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Install needed packages
-      run: sudo apt install wget git build-essential cmake
+      run: sudo apt install wget git build-essential cmake libasound2-dev
     - name: Checkout source
       run: git clone https://github.com/skylersaleh/SkyEmu.git && cd SkyEmu && git submodule update --init --recursive
     - name: Build libretro core
