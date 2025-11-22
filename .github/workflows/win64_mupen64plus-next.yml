@@ -26,7 +26,7 @@ jobs:
           mingw-w64-x86_64-pkg-config
           zip
     - name: Checkout source
-      run: git clone https://github.com/hunterk/mupen64plus-libretro-nx.git && cd mupen64plus-libretro-nx && git submodule update --init --recursive
+      run: git clone https://github.com/hunterk/mupen64plus-libretro-nx.git
     - name: build the thing
       working-directory: mupen64plus-libretro-nx
       run: make -j8
