@@ -1,42 +1,65 @@
-name: mupen64plus-next-libretro Windows x86_64
+name: mupen64plus-next-libretro Windows x86_64 and ARM
 
 on:
   schedule:
-    - cron: '0 2 * * *' # run at 2 AM UTC
-  watch: # this is a hack that lets repo owners trigger a build by starring
+    - cron: '0 2 * * *'
+  watch:
     types: [started]
     if: github.actor == github.event.repository.owner.login
 
 jobs:
   Windows:
     name: Build for Windows
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            release_tag: Windows_64-bit
+            msys_packages: |
+              mingw-w64-x86_64-binutils
+              mingw-w64-x86_64-toolchain
+              mingw-w64-x86_64-zlib
+              mingw-w64-x86_64-pkg-config
+
+          - os: windows-11-arm
+            release_tag: Windows_ARM
+            msys_packages: |
+              mingw-w64-aarch64-binutils
+              mingw-w64-aarch64-toolchain
+              mingw-w64-aarch64-zlib
+              mingw-w64-aarch64-pkg-config
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: >-
-          wget
-          git
-          make
-          mingw-w64-x86_64-binutils
-          mingw-w64-x86_64-toolchain
-          mingw-w64-x86_64-zlib
-          mingw-w64-x86_64-pkg-config
-          zip
-    - name: Checkout source
-      run: git clone https://github.com/hunterk/mupen64plus-libretro-nx.git
-    - name: build the thing
-      working-directory: mupen64plus-libretro-nx
-      run: make CXXFLAGS="-include cstdint CXXFLAGS" -j8
-    - name: Prep for release
-      working-directory: mupen64plus-libretro-nx
-      run: Compress-Archive -CompressionLevel Optimal -Path mupen64plus_next_libretro.dll -DestinationPath ..\mupen64plus_next_libretro.dll.zip
-    - name: Create new release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: Windows_64-bit
-        file: mupen64plus_next_libretro.dll.zip
-        overwrite: true
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            wget
+            git
+            make
+            zip
+            ${{ matrix.msys_packages }}
+
+      - name: Checkout source
+        run: git clone https://github.com/hunterk/mupen64plus-libretro-nx.git
+
+      - name: Build the thing
+        working-directory: mupen64plus-libretro-nx
+        run: make CXXFLAGS="-include cstdint CXXFLAGS" -j8
+
+      - name: Prep for release
+        working-directory: mupen64plus-libretro-nx
+        run: >
+          Compress-Archive -CompressionLevel Optimal
+          -Path mupen64plus_next_libretro.dll
+          -DestinationPath ..\mupen64plus_next_libretro.dll.zip
+
+      - name: Upload to appropriate release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ matrix.release_tag }}
+          file: mupen64plus_next_libretro.dll.zip
+          overwrite: true
