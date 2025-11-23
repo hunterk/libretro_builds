@@ -29,7 +29,7 @@ jobs:
       run: git clone https://github.com/hunterk/mupen64plus-libretro-nx.git
     - name: build the thing
       working-directory: mupen64plus-libretro-nx
-      run: make -j8
+      run: make CXXFLAGS="-include cstdint CXXFLAGS" -j8
     - name: Prep for release
       working-directory: mupen64plus-libretro-nx
       run: Compress-Archive -CompressionLevel Optimal -Path mupen64plus_next_libretro.dll -DestinationPath ..\mupen64plus_next_libretro.dll.zip
