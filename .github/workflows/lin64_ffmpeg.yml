@@ -18,13 +18,13 @@ jobs:
     - name: Download deps
       run: sudo apt-get update && sudo apt-get install -y libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx11-xcb-dev libx264-dev libx265-dev autoconf automake build-essential cmake git-core libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libsdl2-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev meson ninja-build pkg-config texinfo yasm zlib1g-dev libvpx-dev libfdk-aac-dev libopus-dev libdav1d-dev
     - name: Build libretro core
-      working-directory: RetroArch/cores/ffmpeg-libretro
+      working-directory: RetroArch/cores/libretro-ffmpeg
       run: make STATIC_LINK_FFMPEG=1
     - name: strip libs
-      working-directory: RetroArch/cores/ffmpeg-libretro
+      working-directory: RetroArch/cores/libretro-ffmpeg
       run: wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh *.so
     - name: zip libs
-      working-directory: RetroArch/cores/ffmpeg-libretro
+      working-directory: RetroArch/cores/libretro-ffmpeg
       run: zip -9 ../../../ffmpeg_libretro.so.zip ffmpeg_libretro.so
     - name: Create new release
       uses: svenstaro/upload-release-action@v2
