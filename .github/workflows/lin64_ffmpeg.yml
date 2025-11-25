@@ -1,0 +1,41 @@
+name: ffmpeg libretro Linux x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Linux
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source
+      run: git clone https://github.com/hunterk/RetroArch.git && cd RetroArch && git submodule update --init --recursive
+    - name: Download deps
+      run: sudo apt-get update && sudo apt-get install -y libavcodec-dev libavdevice-dev \
+        libavdevice62 libavformat-dev libavutil-dev libswresample-dev libswscale-dev \
+        libx11-dev libx11-xcb-dev libx264-dev libx265-dev autoconf automake build-essential \
+        cmake git-core libass-dev libfreetype6-dev libgnutls28-dev libmp3lam-dev \
+        libsdl2-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev \
+        libxcb-shm0-dev libxcb-xfixes0-dev meson ninja-build pkg-config texinfo \
+        wget yasm zlib1g-dev libvpx-dev libfdk-aac-dev libopus-dev libdav1d-dev
+    - name: Build libretro core
+      working-directory: RetroArch/cores/ffmpeg-libretro
+      run: make STATIC_LINK_FFMPEG=1
+    - name: strip libs
+      working-directory: RetroArch/cores/ffmpeg-libretro
+      run: wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh *.so
+    - name: zip libs
+      working-directory: RetroArch/cores/ffmpeg-libretro
+      run: zip -9 ../../../ffmpeg_libretro.so.zip ffmpeg_libretro.so
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_64-bit
+        file: ffmpeg_libretro.so.zip
+        overwrite: true
