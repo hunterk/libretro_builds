@@ -16,7 +16,7 @@ jobs:
     - name: Checkout source
       run: git clone https://github.com/hunterk/RetroArch.git && cd RetroArch && git submodule update --init --recursive
     - name: Download deps
-      run: sudo apt-get update && sudo apt-get install -y libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx11-xcb-dev libx264-dev libx265-dev autoconf automake build-essential cmake git-core libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libsdl2-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev meson ninja-build pkg-config texinfo yasm zlib1g-dev libvpx-dev libfdk-aac-dev libopus-dev libdav1d-dev
+      run: sudo apt-get update && sudo apt-get install -y libwebpmux3 libwebp-dev libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx11-xcb-dev libx264-dev libx265-dev autoconf automake build-essential cmake git-core libass-dev libfreetype6-dev libgnutls28-dev libmp3lame-dev libsdl2-dev libtool libva-dev libvdpau-dev libvorbis-dev libxcb1-dev libxcb-shm0-dev libxcb-xfixes0-dev meson ninja-build pkg-config texinfo yasm zlib1g-dev libvpx-dev libfdk-aac-dev libopus-dev libdav1d-dev
     - name: Build libretro core
       working-directory: RetroArch/cores/libretro-ffmpeg
       run: make STATIC_LINK_FFMPEG=1
