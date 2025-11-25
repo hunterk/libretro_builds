@@ -4,9 +4,9 @@ name: RetroArch Nightly Build
 on:
   schedule:
   - cron: "0 5 * * *" # build every night at midnight Eastern
-  watch: # this is a hack that lets repo owners trigger a build by starring
-    types: [started]
-    if: github.actor == github.event.repository.owner.login
+#  watch: # this is a hack that lets repo owners trigger a build by starring
+#    types: [started]
+#    if: github.actor == github.event.repository.owner.login
 
 jobs: 
   Assets:

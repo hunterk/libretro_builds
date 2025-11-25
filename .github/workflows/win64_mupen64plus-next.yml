@@ -3,9 +3,9 @@ name: mupen64plus-next-libretro Windows x86_64 and ARM
 on:
   schedule:
     - cron: '0 2 * * *'
-  watch:
-    types: [started]
-    if: github.actor == github.event.repository.owner.login
+#  watch:
+#    types: [started]
+#    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Windows:
