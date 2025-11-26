@@ -13,12 +13,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout
-      run: |
-        git clone https://github.com/hunterk/RetroArch.git
-        cd RetroArch
-        git submodule update --init --recursive
-
     # ------------------------------------------------------------
     # Install MSYS2 with MinGW-w64 toolchain
     # ------------------------------------------------------------
@@ -27,6 +21,10 @@ jobs:
       with:
         update: true
         install: >-
+          wget
+          git
+          make
+          zip
           base-devel
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-pkg-config
@@ -37,6 +35,11 @@ jobs:
           mingw-w64-x86_64-bzip2
           mingw-w64-x86_64-xz
         msystem: MINGW64
+    - name: Checkout
+      run: |
+        git clone https://github.com/hunterk/RetroArch.git
+        cd RetroArch
+        git submodule update --init --recursive
 
     # ------------------------------------------------------------
     # Build STATIC FFMPEG
