@@ -87,21 +87,22 @@ jobs:
     - name: Build libretro core
       shell: msys2 {0}
       working-directory: RetroArch/cores/libretro-ffmpeg
-      env:
-        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
       run: |
-        export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+        export FFMPEG_POSIX_PREFIX=$(cygpath -u "$FFMPEG_STATIC_PREFIX")
+        # Fix pkg-config lookup
+        export PKG_CONFIG_PATH="${FFMPEG_POSIX_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-        # Inject FFmpeg include path into global CFLAGS
-        export CFLAGS="$CFLAGS -I${FFMPEG_STATIC_PREFIX}/include"
+        # Inject FFmpeg include path into CFLAGS
+        export CFLAGS="$CFLAGS -I${FFMPEG_POSIX_PREFIX}/include"
 
         make clean || true
 
         make \
           platform=windows \
           STATIC_LINK_FFMPEG=1 \
-          FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" \
+          FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
           FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+
 
         # DLL must be named this for libretro
         mv ffmpeg_libretro.dll ffmpeg_libretro.dll
