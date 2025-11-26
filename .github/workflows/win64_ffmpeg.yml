@@ -84,7 +84,7 @@ jobs:
             platform=windows \
             STATIC_LINK_FFMPEG=1 \
             FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
-            INCFLAGS="$FFMPEG_INCLUDES" \
+            INCFLAGS+="$FFMPEG_INCLUDES" \
             FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS" \
             FFMPEG_LIBS="$FFMPEG_LIBS"
  
