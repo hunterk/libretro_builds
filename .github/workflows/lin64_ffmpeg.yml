@@ -15,7 +15,7 @@ jobs:
     steps:
     - name: Checkout source
       run: |
-        git clone https://github.com/hunterk/RetroArch.git
+        git clone https://github.com/libretro/RetroArch.git
         cd RetroArch
         git submodule update --init --recursive
 
