@@ -58,7 +58,7 @@ jobs:
 
         ./configure \
           --prefix="$PWD/../ffmpeg-static" \
-          --toolchain=msvc \
+          --toolchain=mingw32 \
           --pkg-config=pkg-config \
           --pkg-config-flags="--static" \
           --extra-cflags="-O2 -fPIC" \
