@@ -87,6 +87,8 @@ jobs:
     - name: Build libretro core
       shell: msys2 {0}
       working-directory: RetroArch/cores/libretro-ffmpeg
+      env:
+        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
       run: |
         export FFMPEG_POSIX_PREFIX=$(cygpath -u "$FFMPEG_STATIC_PREFIX")
         # Fix pkg-config lookup
