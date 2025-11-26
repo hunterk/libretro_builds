@@ -85,30 +85,32 @@ jobs:
     # Build libretro-ffmpeg core
     # ------------------------------------------------------------
     - name: Build libretro core
-      shell: msys2 {0}
-      working-directory: RetroArch/cores/libretro-ffmpeg
-      env:
-        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
-      run: |
-        export FFMPEG_POSIX_PREFIX=$(cygpath -u "$FFMPEG_STATIC_PREFIX")
-        # Fix pkg-config lookup
-        export PKG_CONFIG_PATH="${FFMPEG_POSIX_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+    shell: msys2 {0}
+    working-directory: RetroArch/cores/libretro-ffmpeg
+    env:
+      FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
+    run: |
+      export FFMPEG_POSIX_PREFIX=$(cygpath -u "$FFMPEG_STATIC_PREFIX")
 
-        # Inject FFmpeg include path into CFLAGS
-        export CFLAGS="$CFLAGS -I${FFMPEG_POSIX_PREFIX}/include"
-        export LDFLAGS="$LDFLAGS -L${FFMPEG_POSIX_PREFIX}/lib"
+      export PKG_CONFIG_PATH="${FFMPEG_POSIX_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+      export CFLAGS="$CFLAGS -I${FFMPEG_POSIX_PREFIX}/include"
+      export LDFLAGS="$LDFLAGS -L${FFMPEG_POSIX_PREFIX}/lib"
 
-        make clean || true
+      make clean || true
 
-        make \
-          platform=windows \
-          STATIC_LINK_FFMPEG=1 \
-          FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
-          FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+      # Split pkg-config output into the variables the Makefile really uses
+      export FF_LDFLAGS="$(pkg-config --static --libs-only-L --libs-only-other libavcodec libavformat libavutil libswresample libswscale)"
+      export FF_LIBS="$(pkg-config --static --libs-only-l libavcodec libavformat libavutil libswresample libswscale)"
 
+      echo "FF_LDFLAGS = $FF_LDFLAGS"
+      echo "FF_LIBS    = $FF_LIBS"
 
-        # DLL must be named this for libretro
-        mv ffmpeg_libretro.dll ffmpeg_libretro.dll
+      make \
+        platform=windows \
+        STATIC_LINK_FFMPEG=1 \
+        FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
+        FFMPEG_LDFLAGS="$FF_LDFLAGS" \
+        FFMPEG_LIBS="$FF_LIBS"
 
     # ------------------------------------------------------------
     # Strip + ZIP + Release
