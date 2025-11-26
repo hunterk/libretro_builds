@@ -64,30 +64,24 @@ jobs:
           make -j$(nproc)
           make install
           
-      - name: Build libretro core
-        shell: msys2 {0}
+      - name: Build libretro core (MSVC)
+        shell: cmd
         working-directory: RetroArch/cores/libretro-ffmpeg
         env:
-          FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
+          FFMPEG_STATIC_PREFIX: ${{ github.workspace }}\ffmpeg-static
         run: |
-          export FFMPEG_POSIX_PREFIX=$(cygpath -u "$FFMPEG_STATIC_PREFIX")
+          REM Convert path to Windows format
+          SET FFMPEG_WIN_PREFIX=%FFMPEG_STATIC_PREFIX%
 
-          export PKG_CONFIG_PATH="${FFMPEG_POSIX_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+          REM Enter Visual Studio build environment
+          CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 
-          make clean || true
+          nmake /f Makefile.vc \
+            STATIC_LINK_FFMPEG=1 ^
+            FFMPEG_DIR="%FFMPEG_WIN_PREFIX%" ^
+            FFMPEG_INCLUDES="/I %FFMPEG_WIN_PREFIX%\include" ^
+            FFMPEG_LIBS="%FFMPEG_WIN_PREFIX%\lib\avcodec.lib %FFMPEG_WIN_PREFIX%\lib\avformat.lib %FFMPEG_WIN_PREFIX%\lib\avutil.lib %FFMPEG_WIN_PREFIX%\lib\swresample.lib %FFMPEG_WIN_PREFIX%\lib\swscale.lib"
 
-          export FFMPEG_INCLUDES="$(pkg-config --cflags-only-I libavcodec libavformat libavutil libswresample libswscale)"
-          export FFMPEG_LDFLAGS="$(pkg-config --static --libs-only-L --libs-only-other libavcodec libavformat libavutil libswresample libswscale)"
-          export FFMPEG_LIBS="$(pkg-config --static --libs-only-l libavcodec libavformat libavutil libswresample libswscale)"
-
-          make \
-            platform=windows \
-            STATIC_LINK_FFMPEG=1 \
-            FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
-            CFLAGS_EXTRA="$FFMPEG_INCLUDES" \
-            FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS" \
-            FFMPEG_LIBS="$FFMPEG_LIBS"
- 
       - name: Strip .dll
         shell: msys2 {0}
         working-directory: RetroArch/cores/libretro-ffmpeg
