@@ -85,7 +85,7 @@ jobs:
             STATIC_LINK_FFMPEG=1 \
             FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
             INCLUDES+="$FFMPEG_INCLUDES" \
-            INCFLAS+="$FFMPEG_INCLUDES" \
+            INCFLAGS+="$FFMPEG_INCLUDES" \
             FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS" \
             FFMPEG_LIBS="$FFMPEG_LIBS"
  
