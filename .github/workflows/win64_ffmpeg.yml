@@ -1,3 +1,4 @@
+---
 name: ffmpeg libretro Windows x64
 on:
   schedule:
@@ -9,103 +10,83 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-
     steps:
-    - name: Checkout RetroArch source
-      uses: actions/checkout@v4
-      with:
-        repository: hunterk/RetroArch
-        submodules: recursive
+      - name: Checkout RetroArch source
+        uses: actions/checkout@v4
+        with:
+          repository: hunterk/RetroArch
+          submodules: recursive
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >
+            base-devel git yasm pkgconf mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkgconf mingw-w64-x86_64-nasm mingw-w64-x86_64-opus
+            mingw-w64-x86_64-aom mingw-w64-x86_64-libvpx
+      - name: Build static FFmpeg (MinGW)
+        shell: msys2 {0}
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir ffmpeg-static
+          cd ffmpeg
 
-    # ------------------------------------------------------------
-    # Install MSYS2 for building FFmpeg
-    # ------------------------------------------------------------
-    - name: Install MSYS2
-      uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: >
-          base-devel
-          git
-          yasm
-          pkgconf
-          mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-pkgconf
-          mingw-w64-x86_64-nasm
-          mingw-w64-x86_64-opus
-          mingw-w64-x86_64-aom
-          mingw-w64-x86_64-libvpx
+          ./configure \
+            --prefix="${PWD}/../ffmpeg-static" \
+            --toolchain=mingw64 \
+            --enable-static \
+            --disable-shared \
+            --disable-debug \
+            --disable-doc \
+            --disable-programs \
+            --enable-swscale \
+            --enable-swresample \
+            --enable-avformat \
+            --enable-avcodec \
+            --enable-avutil \
+            --enable-openssl \
+            --extra-cflags="-O3" \
+            --extra-libs="-static"
 
-    # ------------------------------------------------------------
-    # Build FFmpeg statically (MinGW)
-    # ------------------------------------------------------------
-    - name: Build static FFmpeg (MinGW)
-      shell: msys2 {0}
-      working-directory: ${{ github.workspace }}
-      run: |
-        mkdir ffmpeg-static
-        cd ffmpeg
+          make -j$(nproc)
+          make install
+      - name: Build libretro-ffmpeg core (MSVC)
+        shell: cmd
+        working-directory: RetroArch/cores/libretro-ffmpeg
+        env:
+          FFMPEG_STATIC_PREFIX: ${{ github.workspace }}\ffmpeg-static
+        run: >
+          REM Enter MSVC environment
 
-        ./configure \
-          --prefix="${PWD}/../ffmpeg-static" \
-          --toolchain=mingw64 \
-          --enable-static \
-          --disable-shared \
-          --disable-debug \
-          --disable-doc \
-          --disable-programs \
-          --enable-swscale \
-          --enable-swresample \
-          --enable-avformat \
-          --enable-avcodec \
-          --enable-avutil \
-          --enable-openssl \
-          --extra-cflags="-O3" \
-          --extra-libs="-static"
+          CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 
-        make -j$(nproc)
-        make install
 
-    # ------------------------------------------------------------
-    # Build ffmpeg_libretro.dll using MSVC
-    # ------------------------------------------------------------
-    - name: Build libretro-ffmpeg core (MSVC)
-      shell: cmd
-      working-directory: RetroArch/cores/libretro-ffmpeg
-      env:
-        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}\ffmpeg-static
-      run: |
-        REM Enter MSVC environment
-        CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+          REM Location of FFmpeg includes/libs
 
-        REM Location of FFmpeg includes/libs
-        SET FFMPEG_DIR=%FFMPEG_STATIC_PREFIX%
-        SET INC_FFMPEG=/I "%FFMPEG_DIR%\include"
-        SET LIB_FFMPEG=%FFMPEG_DIR%\lib\avcodec.lib ^
-                       %FFMPEG_DIR%\lib\avformat.lib ^
-                       %FFMPEG_DIR%\lib\avutil.lib ^
-                       %FFMPEG_DIR%\lib\swresample.lib ^
-                       %FFMPEG_DIR%\lib\swscale.lib
+          SET FFMPEG_DIR=%FFMPEG_STATIC_PREFIX%
 
-        nmake /f Makefile.vc ^
-          STATIC_LINK_FFMPEG=1 ^
-          FFMPEG_DIR="%FFMPEG_DIR%" ^
-          FFMPEG_INCLUDES="%INC_FFMPEG%" ^
-          FFMPEG_LIBS="%LIB_FFMPEG%"
+          SET INC_FFMPEG=/I "%FFMPEG_DIR%\include"
 
-    # ------------------------------------------------------------
-    # Pack and upload
-    # ------------------------------------------------------------
-    - name: Zip core
-      run: |
-        powershell Compress-Archive -LiteralPath RetroArch/cores/libretro-ffmpeg/ffmpeg_libretro.dll -DestinationPath ffmpeg_libretro.dll.zip -Force
+          SET LIB_FFMPEG=%FFMPEG_DIR%\lib\avcodec.lib ^
+                         %FFMPEG_DIR%\lib\avformat.lib ^
+                         %FFMPEG_DIR%\lib\avutil.lib ^
+                         %FFMPEG_DIR%\lib\swresample.lib ^
+                         %FFMPEG_DIR%\lib\swscale.lib
 
-    - name: Upload release asset
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ffmpeg_libretro.dll.zip
-        tag: Windows_64-bit
-        overwrite: true
+          nmake /f Makefile.vc ^
+            STATIC_LINK_FFMPEG=1 ^
+            FFMPEG_DIR="%FFMPEG_DIR%" ^
+            FFMPEG_INCLUDES="%INC_FFMPEG%" ^
+            FFMPEG_LIBS="%LIB_FFMPEG%"
+      - name: Zip core
+        run: >
+          powershell Compress-Archive -LiteralPath
+          RetroArch/cores/libretro-ffmpeg/ffmpeg_libretro.dll -DestinationPath
+          ffmpeg_libretro.dll.zip -Force
+      - name: Publish release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: Windows_64-bit
           file: ffmpeg_libretro.dll.zip
           overwrite: true
