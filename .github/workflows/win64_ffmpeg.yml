@@ -96,6 +96,7 @@ jobs:
 
         # Inject FFmpeg include path into CFLAGS
         export CFLAGS="$CFLAGS -I${FFMPEG_POSIX_PREFIX}/include"
+        export LDFLAGS="$LDFLAGS -L${FFMPEG_POSIX_PREFIX}/lib"
 
         make clean || true
 
