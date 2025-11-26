@@ -92,13 +92,15 @@ jobs:
       run: |
         export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
 
+        # Inject FFmpeg include path into global CFLAGS
+        export CFLAGS="$CFLAGS -I${FFMPEG_STATIC_PREFIX}/include"
+
         make clean || true
 
         make \
           platform=windows \
           STATIC_LINK_FFMPEG=1 \
           FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" \
-          FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" \
           FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
         # DLL must be named this for libretro
