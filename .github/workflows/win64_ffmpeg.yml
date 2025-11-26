@@ -76,19 +76,17 @@ jobs:
 
           make clean || true
 
-          # Correct pkg-config extraction for this Makefile
-          export FF_INCLUDES="$(pkg-config --cflags-only-I libavcodec libavformat libavutil libswresample libswscale)"
-          export FF_LIBRARIES="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
-
-          echo "FF_INCLUDES = $FF_INCLUDES"
-          echo "FF_LIBRARIES = $FF_LIBRARIES"
+          export FFMPEG_CFLAGS="$(pkg-config --cflags-only-I libavcodec libavformat libavutil libswresample libswscale)"
+          export FFMPEG_LDFLAGS="$(pkg-config --static --libs-only-L --libs-only-other libavcodec libavformat libavutil libswresample libswscale)"
+          export FFMPEG_LIBS="$(pkg-config --static --libs-only-l libavcodec libavformat libavutil libswresample libswscale)"
 
           make \
             platform=windows \
             STATIC_LINK_FFMPEG=1 \
             FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
-            FFMPEG_INCLUDES="$FF_INCLUDES" \
-            FFMPEG_LIBRARIES="$FF_LIBRARIES"
+            FFMPEG_CFLAGS="$FFMPEG_CFLAGS" \
+            FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS" \
+            FFMPEG_LIBS="$FFMPEG_LIBS"
  
       - name: Strip .dll
         shell: msys2 {0}
