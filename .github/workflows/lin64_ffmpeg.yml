@@ -26,7 +26,7 @@ jobs:
           autoconf automake build-essential cmake git-core \
           libass-dev libfreetype6-dev libgnutls28-dev \
           meson ninja-build pkg-config texinfo yasm nasm \
-          zlib1g-dev libbz2-dev liblzma-dev
+          zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev
 
     # ------------------------------------------------------------------
     #       BUILD STATIC FFMPEG FROM SOURCE
