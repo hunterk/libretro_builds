@@ -73,12 +73,20 @@ jobs:
       env:
         FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
       run: |
+        # Add static FFmpeg pkgconfig directory
+        export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+        # Optional: show what pkg-config resolves (debug)
+        pkg-config --libs --static libavcodec
+        pkg-config --cflags --static libavcodec
+
         make clean || true
+
         make \
           STATIC_LINK_FFMPEG=1 \
           FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" \
           FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" \
-          FFMPEG_LDFLAGS="${FFMPEG_STATIC_PREFIX}/lib/*.a -lpthread -lm"
+          FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
     # ------------------------------------------------------------------
     #       POST-PROCESSING
