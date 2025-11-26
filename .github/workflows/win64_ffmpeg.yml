@@ -76,7 +76,7 @@ jobs:
 
           make clean || true
 
-          export FFMPEG_CFLAGS="$(pkg-config --cflags-only-I libavcodec libavformat libavutil libswresample libswscale)"
+          export FFMPEG_INCLUDES="$(pkg-config --cflags-only-I libavcodec libavformat libavutil libswresample libswscale)"
           export FFMPEG_LDFLAGS="$(pkg-config --static --libs-only-L --libs-only-other libavcodec libavformat libavutil libswresample libswscale)"
           export FFMPEG_LIBS="$(pkg-config --static --libs-only-l libavcodec libavformat libavutil libswresample libswscale)"
 
@@ -84,7 +84,7 @@ jobs:
             platform=windows \
             STATIC_LINK_FFMPEG=1 \
             FFMPEG_DIR="${FFMPEG_POSIX_PREFIX}" \
-            FFMPEG_CFLAGS="$FFMPEG_CFLAGS" \
+            INCFLAGS="$FFMPEG_INCLUDES" \
             FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS" \
             FFMPEG_LIBS="$FFMPEG_LIBS"
  
