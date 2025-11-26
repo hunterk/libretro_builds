@@ -77,8 +77,8 @@ jobs:
         make \
           STATIC_LINK_FFMPEG=1 \
           FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" \
-          CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include -fPIC" \
-          LDFLAGS="${FFMPEG_STATIC_PREFIX}/lib/*.a -lrt -lpthread -lm"
+          FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" \
+          FFMPEG_LDFLAGS="${FFMPEG_STATIC_PREFIX}/lib/*.a -lpthread -lm"
 
     # ------------------------------------------------------------------
     #       POST-PROCESSING
