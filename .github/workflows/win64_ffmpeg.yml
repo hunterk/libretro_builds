@@ -1,0 +1,124 @@
+name: ffmpeg libretro Windows x64
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  watch:
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Build-Windows:
+    name: Build Windows x86_64
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      run: |
+        git clone https://github.com/hunterk/RetroArch.git
+        cd RetroArch
+        git submodule update --init --recursive
+
+    # ------------------------------------------------------------
+    # Install MSYS2 with MinGW-w64 toolchain
+    # ------------------------------------------------------------
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          base-devel
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-pkg-config
+          mingw-w64-x86_64-yasm
+          mingw-w64-x86_64-nasm
+          mingw-w64-x86_64-make
+          mingw-w64-x86_64-zlib
+          mingw-w64-x86_64-bzip2
+          mingw-w64-x86_64-xz
+        msystem: MINGW64
+
+    # ------------------------------------------------------------
+    # Build STATIC FFMPEG
+    # ------------------------------------------------------------
+    - name: Download FFmpeg source
+      shell: msys2 {0}
+      run: |
+        git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
+        cd ffmpeg-src
+        git checkout release/6.1
+
+    - name: Build static FFmpeg (Windows)
+      shell: msys2 {0}
+      run: |
+        cd ffmpeg-src
+
+        ./configure \
+          --prefix="$PWD/../ffmpeg-static" \
+          --toolchain=msvc \
+          --pkg-config=pkg-config \
+          --pkg-config-flags="--static" \
+          --extra-cflags="-O2 -fPIC" \
+          --extra-ldflags="-static" \
+          --arch=x86_64 \
+          --target-os=win64 \
+          --enable-static \
+          --disable-shared \
+          --disable-doc \
+          --disable-programs \
+          --disable-debug \
+          --disable-autodetect \
+          --disable-everything \
+          --enable-pic \
+          --enable-protocol=file \
+          --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
+          --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
+          --enable-swresample \
+          --enable-swscale
+
+        make -j$(nproc)
+        make install
+
+    # ------------------------------------------------------------
+    # Build libretro-ffmpeg core
+    # ------------------------------------------------------------
+    - name: Build libretro core
+      shell: msys2 {0}
+      working-directory: RetroArch/cores/libretro-ffmpeg
+      env:
+        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
+      run: |
+        export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+        make clean || true
+
+        make \
+          platform=windows \
+          STATIC_LINK_FFMPEG=1 \
+          FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" \
+          FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" \
+          FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+
+        # DLL must be named this for libretro
+        mv ffmpeg_libretro.dll ffmpeg_libretro.dll
+
+    # ------------------------------------------------------------
+    # Strip + ZIP + Release
+    # ------------------------------------------------------------
+    - name: Strip .dll
+      shell: msys2 {0}
+      working-directory: RetroArch/cores/libretro-ffmpeg
+      run: |
+        strip ffmpeg_libretro.dll
+
+    - name: Create zip
+      shell: bash
+      run: zip -9 ffmpeg_libretro.dll.zip RetroArch/cores/libretro-ffmpeg/ffmpeg_libretro.dll
+
+    - name: Upload release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: ffmpeg_libretro.dll.zip
+        overwrite: true
