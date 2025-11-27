@@ -48,8 +48,8 @@ jobs:
 #      env:
 #        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
       run: |
-        # Add static FFmpeg pkgconfig directory
-        export PKG_CONFIG_PATH="$GITHUB_WORKSPACE/ffmpeg-static/lib/pkgconfig:$PKG_CONFIG_PATH"
+#        # Add static FFmpeg pkgconfig directory
+#        export PKG_CONFIG_PATH="$GITHUB_WORKSPACE/ffmpeg-static/lib/pkgconfig:$PKG_CONFIG_PATH"
 
         # Optional: show what pkg-config resolves (debug)
         pkg-config --libs --static libavcodec
