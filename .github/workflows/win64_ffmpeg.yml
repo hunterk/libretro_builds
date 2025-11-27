@@ -20,13 +20,7 @@ jobs:
         git submodule update --init --recursive
 
     - name: Install base build tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          autoconf automake build-essential cmake git-core \
-          libass-dev libfreetype6-dev libgnutls28-dev \
-          meson ninja-build pkg-config texinfo yasm nasm \
-          zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev
+      run: sudo apt-get update && sudo apt-get install -y autoconf automake build-essential cmake mingw-w64-tools git-core libass-dev libfreetype6-dev libgnutls28-dev meson ninja-build pkg-config texinfo yasm nasm zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev
 
     # ------------------------------------------------------------------
     #       BUILD STATIC FFMPEG FROM SOURCE
@@ -41,32 +35,7 @@ jobs:
       run: |
         cd ffmpeg-src
 
-        ./configure \
-          --prefix="$GITHUB_WORKSPACE/ffmpeg-static" \
-          --pkg-config-flags="--static" \
-          --extra-cflags="-fPIC" \
-          --extra-ldflags="-static" \
-          --cc=x86_64-w64-mingw32-gcc \
-          --cxx=x86_64-w64-mingw32-g++ \
-          --cross-prefix=x86_64-w64-mingw32- \
-          --target-os=mingw32 \
-          --arch=x86_64 \
-          --enable-cross-compile \
-          --enable-static \
-          --disable-shared \
-          --disable-programs \
-          --disable-doc \
-          --disable-debug \
-          --enable-pic \
-          --enable-gpl \
-          --enable-nonfree \
-          --disable-autodetect \
-          --disable-everything \
-          --enable-protocol=file \
-          --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
-          --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
-          --enable-swresample \
-          --enable-swscale
+        ./configure --prefix="$GITHUB_WORKSPACE/ffmpeg-static" --pkg-config-flags="--static" --extra-cflags="-fPIC" --extra-ldflags="-static" --cc=x86_64-w64-mingw32-gcc --cxx=x86_64-w64-mingw32-g++ --cross-prefix=x86_64-w64-mingw32- --target-os=mingw32 --arch=x86_64 --enable-cross-compile --enable-static --disable-shared --disable-programs --disable-doc --disable-debug --enable-pic --enable-gpl --enable-nonfree --disable-autodetect --disable-everything --enable-protocol=file --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le --enable-swresample --enable-swscale
 
         make -j$(nproc)
         make install
@@ -89,13 +58,7 @@ jobs:
         make clean || true
 
         make \
-          platform=win \
-          CC=x86_64-w64-mingw32-gcc \
-          CXX=x86_64-w64-mingw32-g++ \
-          STATIC_LINK_FFMPEG=1 \
-          FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" \
-          FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" \
-          FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+          make platform=win CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
     # ------------------------------------------------------------------
     #       POST-PROCESSING
