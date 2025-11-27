@@ -48,13 +48,14 @@ jobs:
 #      env:
 #        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
       run: |
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/ffmpeg-static/lib/pkgconfig"
         pkg-config --libs --static libavcodec
         pkg-config --cflags --static libavcodec
         echo "$PKG_CONFIG_PATH"
 
         make clean || true
 
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/ffmpeg-static/lib/pkgconfig" && make platform=win CC=x86_64-w64-mingw32-gcc LIBS="-L/usr/local/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic -L../../../ffmpeg-static/lib" CFLAGS="-I/usr/local/include -I/usr/x86_64-w64-mingw32/include -I../../../ffmpeg-static/include -I./.. -I. -I./../../libretro-common/include -I./../../libretro-common/include/compat" CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+        make platform=win CC=x86_64-w64-mingw32-gcc LIBS="-L/usr/local/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic -L../../../ffmpeg-static/lib" CFLAGS="-I/usr/local/include -I/usr/x86_64-w64-mingw32/include -I../../../ffmpeg-static/include -I./.. -I. -I./../../libretro-common/include -I./../../libretro-common/include/compat" CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
     # ------------------------------------------------------------------
     #       POST-PROCESSING
