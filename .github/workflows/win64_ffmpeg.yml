@@ -50,7 +50,7 @@ jobs:
       # ------------------------------------
       # Build FFmpeg (Clang targeting MSVC ABI)
       # ------------------------------------
-      - name: Build FFmpeg (Clang/MSVC ABI)
+      - name: Build FFmpeg (MinGW Clang -> MSVC ABI)
         shell: msys2 {0}
         env:
           PREFIX: ${{ github.workspace }}/ffmpeg-windows
@@ -59,13 +59,16 @@ jobs:
 
           export CC=clang
           export CXX=clang++
-          export LD=lld
           export AR=llvm-ar
           export RANLIB=llvm-ranlib
           export STRIP=llvm-strip
 
           ./configure \
-            --toolchain=clang \
+            --target-os=mingw32 \
+            --cc=clang \
+            --cxx=clang++ \
+            --ar=llvm-ar \
+            --ranlib=llvm-ranlib \
             --prefix="$PREFIX" \
             --disable-shared \
             --enable-static \
@@ -80,7 +83,9 @@ jobs:
             --enable-swresample \
             --enable-swscale \
             --enable-gpl \
-            --enable-nonfree
+            --enable-nonfree \
+            --extra-cflags="-fuse-ld=lld -Wno-deprecated-declarations" \
+            --extra-ldflags="-fuse-ld=lld"
 
           make -j$(nproc)
           make install
