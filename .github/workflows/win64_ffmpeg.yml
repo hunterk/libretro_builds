@@ -2,7 +2,7 @@ name: ffmpeg libretro Windows x64
 
 on:
   schedule:
-    - cron: "0 2 * * *"  
+    - cron: "0 2 * * *"
   watch:
     types: [started]
     if: github.actor == github.event.repository.owner.login
@@ -20,108 +20,120 @@ jobs:
         with:
           repository: libretro/RetroArch
           submodules: recursive
-          path: RetroArch
 
       # ----------------------------
-      # Install Visual Studio Build Tools
+      # Install MSVC environment
       # ----------------------------
       - name: Install MSVC build tools
         uses: microsoft/setup-msbuild@v2
 
       # ----------------------------
-      # Install Python + Meson + Ninja
+      # Install MSYS2 (needed for FFmpeg’s configure)
       # ----------------------------
-      - name: Install Python
-        uses: actions/setup-python@v5
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
         with:
-          python-version: "3.11"
-
-      - name: Install Meson + Ninja
-        run: |
-          pip install meson ninja
+          update: true
+          msystem: MSYS
+          install: >
+            bash
+            coreutils
+            make
+            yasm
+            nasm
 
       # ----------------------------
       # Clone FFmpeg
       # ----------------------------
-      - name: Download FFmpeg source
+      - name: Clone FFmpeg
         run: |
           git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
           cd ffmpeg-src
           git checkout release/6.1
 
       # ----------------------------
-      # Build FFmpeg (MSVC + Meson)
+      # Build FFmpeg with MSVC toolchain inside MSYS2
       # ----------------------------
-      - name: Build FFmpeg with MSVC
-        shell: cmd
+      - name: Build FFmpeg (MSVC)
+        shell: msys2 {0}
+        env:
+          PREFIX_WIN: ${{ github.workspace }}\ffmpeg-windows
         run: |
-          REM Enter MSVC environment
-          CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+          # Enter MSVC environment (use Windows path)
+          cmd.exe /C "\"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat\""
 
           cd ffmpeg-src
 
-          REM Configure Meson build
-          meson setup build-msvc ^
-            --buildtype=release ^
-            --default-library=static ^
-            -Denable_gpl=true ^
-            -Denable_nonfree=true ^
-            -Ddisable_autodetect=true ^
-            -Dprotocols=file ^
-            -Ddemuxers=mov,matroska,avi,mp3,aac,ogg,wav,flac ^
-            -Ddecoders=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le ^
-            -Dswresample=enabled ^
-            -Dswscale=enabled
+          ./configure \
+            --toolchain=msvc \
+            --prefix="$PREFIX_WIN" \
+            --enable-static \
+            --disable-shared \
+            --disable-programs \
+            --disable-doc \
+            --disable-debug \
+            --disable-autodetect \
+            --disable-everything \
+            --enable-protocol=file \
+            --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
+            --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
+            --enable-swresample \
+            --enable-swscale \
+            --enable-gpl \
+            --enable-nonfree
 
-          REM Build & install
-          ninja -C build-msvc
-          ninja -C build-msvc install
+          make -j$(nproc)
+          make install
 
       # ----------------------------
       # Build libretro-ffmpeg (MSVC)
       # ----------------------------
       - name: Build libretro-ffmpeg core
         shell: cmd
-        working-directory: ${{ github.workspace }}\RetroArch\cores\libretro-ffmpeg
+        working-directory: RetroArch\cores\libretro-ffmpeg
         env:
-          FFMPEG_PREFIX: ${{ github.workspace }}\ffmpeg-src\build-msvc\install
+          PREFIX_WIN: ${{ github.workspace }}\ffmpeg-windows
         run: |
           REM Enter MSVC environment
           CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 
-          SET INC_FFMPEG=/I "%FFMPEG_PREFIX%\include"
-          SET LIB_FFMPEG="%FFMPEG_PREFIX%\lib\avcodec.lib" ^
-                         "%FFMPEG_PREFIX%\lib\avformat.lib" ^
-                         "%FFMPEG_PREFIX%\lib\avutil.lib" ^
-                         "%FFMPEG_PREFIX%\lib\swresample.lib" ^
-                         "%FFMPEG_PREFIX%\lib\swscale.lib"
+          SET FFMPEG_DIR=%PREFIX_WIN%
+          SET FFMPEG_INCLUDES=/I "%FFMPEG_DIR%\include"
+          SET FFMPEG_LIBS="%FFMPEG_DIR%\lib\avcodec.lib" ^
+                          "%FFMPEG_DIR%\lib\avformat.lib" ^
+                          "%FFMPEG_DIR%\lib\avutil.lib" ^
+                          "%FFMPEG_DIR%\lib\swresample.lib" ^
+                          "%FFMPEG_DIR%\lib\swscale.lib"
 
           nmake /f Makefile.vc ^
             STATIC_LINK_FFMPEG=1 ^
-            FFMPEG_INCLUDES="%INC_FFMPEG%" ^
-            FFMPEG_LIBS="%LIB_FFMPEG%" ^
-            FFMPEG_DIR="%FFMPEG_PREFIX%"
+            FFMPEG_DIR="%FFMPEG_DIR%" ^
+            FFMPEG_INCLUDES="%FFMPEG_INCLUDES%" ^
+            FFMPEG_LIBS="%FFMPEG_LIBS%"
 
       # ----------------------------
-      # Strip the DLL
+      # Strip DLL (optional)
       # ----------------------------
-      - name: Strip libretro-ffmpeg DLL
-        shell: cmd
-        working-directory: ${{ github.workspace }}\\RetroArch\\cores\\libretro-ffmpeg
+      - name: Strip libretro DLL
+        shell: powershell
+        working-directory: RetroArch\cores\libretro-ffmpeg
         run: |
-          REM Strip debug symbols using llvm-strip
-          "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\15.0*\bin\Hostx64\x64\llvm-strip.exe" ^
-            ffmpeg_libretro.dll
+          $strip = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio" -Recurse -Filter llvm-strip.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($strip) {
+            & $strip.FullName ffmpeg_libretro.dll
+          } else {
+            Write-Host "llvm-strip not found, skipping"
+          }
 
       # ----------------------------
-      # Zip the core
+      # Zip core
       # ----------------------------
       - name: Zip core
-        shell: powershell
         run: |
-          Compress-Archive -LiteralPath "${{ github.workspace }}\RetroArch\cores\libretro-ffmpeg\ffmpeg_libretro.dll" `
-                           -DestinationPath "${{ github.workspace }}\ffmpeg_libretro.dll.zip" `
-                           -Force
+          powershell Compress-Archive `
+            -LiteralPath RetroArch/cores/libretro-ffmpeg/ffmpeg_libretro.dll `
+            -DestinationPath ffmpeg_libretro.dll.zip `
+            -Force
 
       # ----------------------------
       # Upload release
@@ -131,5 +143,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: Windows_64-bit
-          file: "${{ github.workspace }}\ffmpeg_libretro.dll.zip"
+          file: ffmpeg_libretro.dll.zip
           overwrite: true
