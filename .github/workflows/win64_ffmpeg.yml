@@ -79,9 +79,9 @@ jobs:
       # ----------------------------
       - name: Build libretro-ffmpeg core
         shell: cmd
-        working-directory: RetroArch\cores\libretro-ffmpeg
+        working-directory: ${{ github.workspace }}\\RetroArch\\cores\\libretro-ffmpeg
         env:
-          FFMPEG_PREFIX: ${{ github.workspace }}\ffmpeg-src\build-msvc\install
+          FFMPEG_PREFIX: ${{ github.workspace }}\\ffmpeg-src\\build-msvc\\install
         run: |
           REM Enter MSVC environment
           CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
@@ -100,22 +100,25 @@ jobs:
             FFMPEG_DIR="%FFMPEG_PREFIX%"
 
       # ----------------------------
-      # Strip and zip the core
+      # Strip the DLL
       # ----------------------------
       - name: Strip libretro-ffmpeg DLL
         shell: cmd
-        working-directory: RetroArch\cores\libretro-ffmpeg
+        working-directory: ${{ github.workspace }}\\RetroArch\\cores\\libretro-ffmpeg
         run: |
-          REM Strip debug symbols using llvm-strip (comes with MSVC toolset)
+          REM Strip debug symbols using llvm-strip
           "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\15.0*\bin\Hostx64\x64\llvm-strip.exe" ^
             ffmpeg_libretro.dll
-            
+
+      # ----------------------------
+      # Zip the core
+      # ----------------------------
       - name: Zip core
+        shell: powershell
         run: |
-          powershell Compress-Archive `
-            -LiteralPath RetroArch/cores/libretro-ffmpeg/ffmpeg_libretro.dll `
-            -DestinationPath ffmpeg_libretro.dll.zip `
-            -Force
+          Compress-Archive -LiteralPath "${{ github.workspace }}\RetroArch\cores\libretro-ffmpeg\ffmpeg_libretro.dll" `
+                           -DestinationPath "${{ github.workspace }}\ffmpeg_libretro.dll.zip" `
+                           -Force
 
       # ----------------------------
       # Upload release
@@ -125,5 +128,5 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: Windows_64-bit
-          file: ffmpeg_libretro.dll.zip
+          file: "${{ github.workspace }}\ffmpeg_libretro.dll.zip"
           overwrite: true
