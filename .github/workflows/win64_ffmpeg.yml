@@ -2,8 +2,10 @@ name: ffmpeg libretro Windows x64
 
 on:
   schedule:
-    - cron: "0 2 * * *"
-  workflow_dispatch:
+    - cron: "0 2 * * *"  
+  watch:
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
 
 jobs:
   build-windows:
