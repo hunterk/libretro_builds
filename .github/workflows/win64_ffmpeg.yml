@@ -9,79 +9,53 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        shell: bash
+    env:
+      PREFIX: ${{ github.workspace }}/ffmpeg-windows
+      FFMPEG_SRC: ${{ github.workspace }}/ffmpeg-src
+      CORES_DIR: ${{ github.workspace }}/RetroArch/cores/libretro-ffmpeg
 
     steps:
-      # ------------------------------------
+      # ----------------------------
       # Checkout RetroArch
-      # ------------------------------------
+      # ----------------------------
       - name: Checkout RetroArch source
         uses: actions/checkout@v4
         with:
-          repository: libretro/RetroArch
           submodules: recursive
 
-      # ------------------------------------
-      # Install MSYS2 with Clang
-      # ------------------------------------
-      - name: Install MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: >
-            base-devel git yasm pkgconf
-            mingw-w64-x86_64-clang
-            mingw-w64-x86_64-lld
-            mingw-w64-x86_64-llvm
+      # ----------------------------
+      # Install dependencies
+      # ----------------------------
+      - name: Install build dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            git yasm nasm pkg-config mingw-w64 clang curl zip
 
-      # ------------------------------------
+      # ----------------------------
       # Clone FFmpeg
-      # ------------------------------------
+      # ----------------------------
       - name: Download FFmpeg source
         run: |
-          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
-          cd ffmpeg-src
+          git clone https://github.com/FFmpeg/FFmpeg.git $FFMPEG_SRC
+          cd $FFMPEG_SRC
           git checkout release/6.1
 
-      # ------------------------------------
-      # Build FFmpeg (Clang targeting MSVC ABI)
-      # ------------------------------------
-      - name: Test MinGW Clang compiler
-        shell: msys2 {0}
+      # ----------------------------
+      # Build static FFmpeg for Windows
+      # ----------------------------
+      - name: Build FFmpeg (static Windows x64)
         run: |
-          echo "Testing compilation..."
-          echo "int main(){return 0;}" > test.c
-          x86_64-w64-mingw32-clang test.c -o test.exe
-          file test.exe
-          
-      - name: Build FFmpeg (MinGW Clang -> MSVC ABI)
-        shell: msys2 {0}
-        env:
-          PREFIX: ${{ github.workspace }}/ffmpeg-windows
-        run: |
-          cd ffmpeg-src
-
-          export CC=x86_64-w64-mingw32-clang
-          export CXX=x86_64-w64-mingw32-clang++
-          export AR=llvm-ar
-          export RANLIB=llvm-ranlib
-          export STRIP=llvm-strip
-
+          cd $FFMPEG_SRC
           ./configure \
-            --enable-cross-compile
-            --target-os=mingw32
-            --arch=x86_64
-            --cc="$CC" \
-            --cxx="$CXX" \
-            --ar="$AR" \
-            --ranlib="$RANLIB" \
             --prefix="$PREFIX" \
-            --disable-shared \
+            --cross-prefix=x86_64-w64-mingw32- \
+            --target-os=mingw32 \
+            --arch=x86_64 \
             --enable-static \
+            --disable-shared \
             --disable-programs \
             --disable-doc \
             --disable-debug \
@@ -93,57 +67,41 @@ jobs:
             --enable-swresample \
             --enable-swscale \
             --enable-gpl \
-            --enable-nonfree \
-            --extra-cflags="-fuse-ld=lld -Wno-deprecated-declarations" \
-            --extra-ldflags="-fuse-ld=lld"
-
+            --enable-nonfree
           make -j$(nproc)
           make install
 
-      # ------------------------------------
-      # Build libretro-ffmpeg using MSVC
-      # ------------------------------------
-      - name: Build libretro-ffmpeg core (MSVC)
-        shell: cmd
-        working-directory: RetroArch\cores\libretro-ffmpeg
-        env:
-          FFMPEG_PREFIX: ${{ github.workspace }}\ffmpeg-windows
+      # ----------------------------
+      # Build libretro-ffmpeg core
+      # ----------------------------
+      - name: Build libretro-ffmpeg core (Windows x64)
         run: |
-          REM Load Visual Studio compiler environment
-          CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+          cd $CORES_DIR
+          make clean || true
 
-          SET INC_FFMPEG=/I "%FFMPEG_PREFIX%\include"
-          SET LIB_FFMPEG="%FFMPEG_PREFIX%\lib\avcodec.lib" ^
-                         "%FFMPEG_PREFIX%\lib\avformat.lib" ^
-                         "%FFMPEG_PREFIX%\lib\avutil.lib" ^
-                         "%FFMPEG_PREFIX%\lib\swresample.lib" ^
-                         "%FFMPEG_PREFIX%\lib\swscale.lib"
+          # Set cross compiler and FFmpeg paths
+          make \
+            platform=windows \
+            STATIC_LINK_FFMPEG=1 \
+            FFMPEG_DIR="$PREFIX" \
+            CFLAGS="-I$PREFIX/include" \
+            FFMPEG_LDFLAGS="-L$PREFIX/lib" \
+            FFMPEG_LIBS="-lavcodec -lavformat -lavutil -lswresample -lswscale" \
+            -j$(nproc)
 
-          nmake /f Makefile.vc ^
-            STATIC_LINK_FFMPEG=1 ^
-            FFMPEG_DIR="%FFMPEG_PREFIX%" ^
-            FFMPEG_INCLUDES="%INC_FFMPEG%" ^
-            FFMPEG_LIBS="%LIB_FFMPEG%"
-
-      # ------------------------------------
-      # Strip the resulting DLL
-      # ------------------------------------
-      - name: Strip DLL
-        shell: cmd
-        working-directory: RetroArch\cores\libretro-ffmpeg
+      # ----------------------------
+      # Strip DLL
+      # ----------------------------
+      - name: Strip libretro-ffmpeg DLL
         run: |
-          REM Use LLVM strip (works on clang/MSVC ABI)
-          "%ProgramFiles%\LLVM\bin\llvm-strip.exe" ffmpeg_libretro.dll || echo "llvm-strip not found"
+          x86_64-w64-mingw32-strip $CORES_DIR/ffmpeg_libretro.dll
 
-      # ------------------------------------
-      # Package up the core
-      # ------------------------------------
+      # ----------------------------
+      # Zip the DLL
+      # ----------------------------
       - name: Zip core
         run: |
-          powershell Compress-Archive `
-            -LiteralPath RetroArch/cores/libretro-ffmpeg/ffmpeg_libretro.dll `
-            -DestinationPath ffmpeg_libretro.dll.zip `
-            -Force
+          zip -j ffmpeg_libretro.dll.zip $CORES_DIR/ffmpeg_libretro.dll
 
       # ----------------------------
       # Upload release
