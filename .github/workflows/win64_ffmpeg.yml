@@ -48,7 +48,7 @@ jobs:
           --extra-ldflags="-static" \
           --cc=x86_64-w64-mingw32-gcc \
           --cxx=x86_64-w64-mingw32-g++ \
-          --target-os=mingw32 \
+          --target-os=win64 \
           --arch=x86_64 \
           --enable-cross-compile \
           --cross-prefix=x86_64-w64-mingw32- \
