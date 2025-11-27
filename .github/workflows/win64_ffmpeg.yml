@@ -33,10 +33,10 @@ jobs:
         with:
           update: true
           install: >
-            base-devel git pkgconf
+            base-devel git yasm pkgconf
             mingw-w64-x86_64-clang
-            mingw-w64-x86_64-pkgconf
-            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-lld
+            mingw-w64-x86_64-llvm
 
       # ------------------------------------
       # Clone FFmpeg
@@ -57,18 +57,19 @@ jobs:
         run: |
           cd ffmpeg-src
 
-          export CC=clang
-          export CXX=clang++
+          export CC=x86_64-w64-mingw32-clang
+          export CXX=x86_64-w64-mingw32-clang++
           export AR=llvm-ar
           export RANLIB=llvm-ranlib
           export STRIP=llvm-strip
 
           ./configure \
             --target-os=mingw32 \
-            --cc=clang \
-            --cxx=clang++ \
-            --ar=llvm-ar \
-            --ranlib=llvm-ranlib \
+            --arch=x86_64 \
+            --cc="$CC" \
+            --cxx="$CXX" \
+            --ar="$AR" \
+            --ranlib="$RANLIB" \
             --prefix="$PREFIX" \
             --disable-shared \
             --enable-static \
