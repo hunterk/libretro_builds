@@ -11,64 +11,64 @@ jobs:
   build-windows:
     runs-on: windows-latest
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      # ----------------------------
+      # ------------------------------------
       # Checkout RetroArch
-      # ----------------------------
+      # ------------------------------------
       - name: Checkout RetroArch source
         uses: actions/checkout@v4
         with:
           repository: libretro/RetroArch
           submodules: recursive
 
-      # ----------------------------
-      # Install MSVC environment
-      # ----------------------------
-      - name: Install MSVC build tools
-        uses: microsoft/setup-msbuild@v2
-
-      # ----------------------------
-      # Install MSYS2 (needed for FFmpeg’s configure)
-      # ----------------------------
+      # ------------------------------------
+      # Install MSYS2 with Clang
+      # ------------------------------------
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
         with:
           update: true
-          msystem: MSYS
           install: >
-            bash
-            coreutils
-            make
-            yasm
-            nasm
+            base-devel git pkgconf
+            mingw-w64-x86_64-clang
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-ninja
 
-      # ----------------------------
+      # ------------------------------------
       # Clone FFmpeg
-      # ----------------------------
-      - name: Clone FFmpeg
+      # ------------------------------------
+      - name: Download FFmpeg source
         run: |
           git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
           cd ffmpeg-src
           git checkout release/6.1
 
-      # ----------------------------
-      # Build FFmpeg with MSVC toolchain inside MSYS2
-      # ----------------------------
-      - name: Build FFmpeg (MSVC)
+      # ------------------------------------
+      # Build FFmpeg (Clang targeting MSVC ABI)
+      # ------------------------------------
+      - name: Build FFmpeg (Clang/MSVC ABI)
         shell: msys2 {0}
         env:
-          PREFIX_WIN: ${{ github.workspace }}\ffmpeg-windows
+          PREFIX: ${{ github.workspace }}/ffmpeg-windows
         run: |
-          # Enter MSVC environment (use Windows path)
-          cmd.exe /C "\"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat\""
-
           cd ffmpeg-src
 
+          export CC=clang
+          export CXX=clang++
+          export LD=lld
+          export AR=llvm-ar
+          export RANLIB=llvm-ranlib
+          export STRIP=llvm-strip
+
           ./configure \
-            --toolchain=msvc \
-            --prefix="$PREFIX_WIN" \
-            --enable-static \
+            --toolchain=clang \
+            --prefix="$PREFIX" \
             --disable-shared \
+            --enable-static \
             --disable-programs \
             --disable-doc \
             --disable-debug \
@@ -85,49 +85,44 @@ jobs:
           make -j$(nproc)
           make install
 
-      # ----------------------------
-      # Build libretro-ffmpeg (MSVC)
-      # ----------------------------
-      - name: Build libretro-ffmpeg core
+      # ------------------------------------
+      # Build libretro-ffmpeg using MSVC
+      # ------------------------------------
+      - name: Build libretro-ffmpeg core (MSVC)
         shell: cmd
         working-directory: RetroArch\cores\libretro-ffmpeg
         env:
-          PREFIX_WIN: ${{ github.workspace }}\ffmpeg-windows
+          FFMPEG_PREFIX: ${{ github.workspace }}\ffmpeg-windows
         run: |
-          REM Enter MSVC environment
+          REM Load Visual Studio compiler environment
           CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 
-          SET FFMPEG_DIR=%PREFIX_WIN%
-          SET FFMPEG_INCLUDES=/I "%FFMPEG_DIR%\include"
-          SET FFMPEG_LIBS="%FFMPEG_DIR%\lib\avcodec.lib" ^
-                          "%FFMPEG_DIR%\lib\avformat.lib" ^
-                          "%FFMPEG_DIR%\lib\avutil.lib" ^
-                          "%FFMPEG_DIR%\lib\swresample.lib" ^
-                          "%FFMPEG_DIR%\lib\swscale.lib"
+          SET INC_FFMPEG=/I "%FFMPEG_PREFIX%\include"
+          SET LIB_FFMPEG="%FFMPEG_PREFIX%\lib\avcodec.lib" ^
+                         "%FFMPEG_PREFIX%\lib\avformat.lib" ^
+                         "%FFMPEG_PREFIX%\lib\avutil.lib" ^
+                         "%FFMPEG_PREFIX%\lib\swresample.lib" ^
+                         "%FFMPEG_PREFIX%\lib\swscale.lib"
 
           nmake /f Makefile.vc ^
             STATIC_LINK_FFMPEG=1 ^
-            FFMPEG_DIR="%FFMPEG_DIR%" ^
-            FFMPEG_INCLUDES="%FFMPEG_INCLUDES%" ^
-            FFMPEG_LIBS="%FFMPEG_LIBS%"
+            FFMPEG_DIR="%FFMPEG_PREFIX%" ^
+            FFMPEG_INCLUDES="%INC_FFMPEG%" ^
+            FFMPEG_LIBS="%LIB_FFMPEG%"
 
-      # ----------------------------
-      # Strip DLL (optional)
-      # ----------------------------
-      - name: Strip libretro DLL
-        shell: powershell
+      # ------------------------------------
+      # Strip the resulting DLL
+      # ------------------------------------
+      - name: Strip DLL
+        shell: cmd
         working-directory: RetroArch\cores\libretro-ffmpeg
         run: |
-          $strip = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio" -Recurse -Filter llvm-strip.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($strip) {
-            & $strip.FullName ffmpeg_libretro.dll
-          } else {
-            Write-Host "llvm-strip not found, skipping"
-          }
+          REM Use LLVM strip (works on clang/MSVC ABI)
+          "%ProgramFiles%\LLVM\bin\llvm-strip.exe" ffmpeg_libretro.dll || echo "llvm-strip not found"
 
-      # ----------------------------
-      # Zip core
-      # ----------------------------
+      # ------------------------------------
+      # Package up the core
+      # ------------------------------------
       - name: Zip core
         run: |
           powershell Compress-Archive `
