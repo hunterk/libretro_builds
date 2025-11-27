@@ -50,6 +50,14 @@ jobs:
       # ------------------------------------
       # Build FFmpeg (Clang targeting MSVC ABI)
       # ------------------------------------
+      - name: Test MinGW Clang compiler
+        shell: msys2 {0}
+        run: |
+          echo "Testing compilation..."
+          echo "int main(){return 0;}" > test.c
+          x86_64-w64-mingw32-clang test.c -o test.exe
+          file test.exe
+          
       - name: Build FFmpeg (MinGW Clang -> MSVC ABI)
         shell: msys2 {0}
         env:
@@ -64,8 +72,9 @@ jobs:
           export STRIP=llvm-strip
 
           ./configure \
-            --target-os=mingw32 \
-            --arch=x86_64 \
+            --enable-cross-compile
+            --target-os=mingw32
+            --arch=x86_64
             --cc="$CC" \
             --cxx="$CXX" \
             --ar="$AR" \
