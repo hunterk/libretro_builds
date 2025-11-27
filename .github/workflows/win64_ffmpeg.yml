@@ -9,7 +9,7 @@ on:
 
 jobs:
   Build:
-    name: Build for Linux
+    name: Build for Windows
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +38,7 @@ jobs:
         ./configure --pkg-config-flags="--static" --extra-cflags="-fPIC" --extra-ldflags="-static" --cc=/usr/bin/x86_64-w64-mingw32-gcc --cxx=/usr/bin/x86_64-w64-mingw32-g++ --cross-prefix=x86_64-w64-mingw32- --target-os=mingw32 --arch=x86_64 --enable-cross-compile --enable-static --disable-shared --disable-programs --disable-doc --disable-debug --enable-pic --enable-gpl --enable-nonfree --disable-autodetect --disable-everything --enable-protocol=file --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le --enable-swresample --enable-swscale
 
         make -j$(nproc)
-        sudo make install PREFIX=/usr/local
+        sudo make install
 
     # ------------------------------------------------------------------
     #       BUILD LIBRETRO FFMPEG CORE USING STATIC FFMPEG
@@ -50,10 +50,11 @@ jobs:
       run: |
         pkg-config --libs --static libavcodec
         pkg-config --cflags --static libavcodec
+        echo "$PKG_CONFIG_PATH"
 
         make clean || true
 
-        make platform=win CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/ffmpeg-static/lib/pkgconfig" && make platform=win CC=x86_64-w64-mingw32-gcc LIBS="-L/usr/local/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic -L/ffmpeg-static/lib" CFLAGS="-I/usr/local/include -I/usr/x86_64-w64-mingw32/include -I/ffmpeg-static/include" CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
     # ------------------------------------------------------------------
     #       POST-PROCESSING
