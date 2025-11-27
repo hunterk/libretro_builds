@@ -57,8 +57,7 @@ jobs:
 
         make clean || true
 
-        make \
-          make platform=win CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+        make platform=win CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
     # ------------------------------------------------------------------
     #       POST-PROCESSING
