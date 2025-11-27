@@ -14,7 +14,7 @@ jobs:
       - name: Checkout RetroArch source
         uses: actions/checkout@v4
         with:
-          repository: hunterk/RetroArch
+          repository: libretro/RetroArch
           submodules: recursive
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
@@ -24,37 +24,46 @@ jobs:
             base-devel git yasm pkgconf mingw-w64-x86_64-gcc
             mingw-w64-x86_64-pkgconf mingw-w64-x86_64-nasm mingw-w64-x86_64-opus
             mingw-w64-x86_64-aom mingw-w64-x86_64-libvpx
+      - name: Download FFmpeg source
+        run: |
+          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
+          cd ffmpeg-src
+          git checkout release/6.1
       - name: Build static FFmpeg (MinGW)
         shell: msys2 {0}
         working-directory: ${{ github.workspace }}
         run: |
-          mkdir ffmpeg-static
-          cd ffmpeg
+          cd ffmpeg-src
 
           ./configure \
-            --prefix="${PWD}/../ffmpeg-static" \
-            --toolchain=mingw64 \
+            --prefix="$GITHUB_WORKSPACE/ffmpeg-static" \
+            --pkg-config-flags="--static" \
+            --extra-cflags="-fPIC" \
+            --extra-ldflags="-static" \
             --enable-static \
             --disable-shared \
-            --disable-debug \
-            --disable-doc \
             --disable-programs \
-            --enable-swscale \
+            --disable-doc \
+            --disable-debug \
+            --enable-pic \
+            --enable-gpl \
+            --enable-nonfree \
+            --disable-autodetect \
+            --disable-everything \
+            --enable-protocol=file \
+            --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
+            --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
             --enable-swresample \
-            --enable-avformat \
-            --enable-avcodec \
-            --enable-avutil \
-            --enable-openssl \
-            --extra-cflags="-O3" \
-            --extra-libs="-static"
+            --enable-swscale
 
           make -j$(nproc)
           make install
+          
       - name: Build libretro-ffmpeg core (MSVC)
         shell: cmd
         working-directory: RetroArch/cores/libretro-ffmpeg
         env:
-          FFMPEG_STATIC_PREFIX: ${{ github.workspace }}\ffmpeg-static
+          FFMPEG_STATIC_PREFIX: ${{ github.workspace }}\ffmpeg-src
         run: >
           REM Enter MSVC environment
 
