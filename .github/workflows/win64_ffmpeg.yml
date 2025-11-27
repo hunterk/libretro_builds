@@ -18,6 +18,7 @@ jobs:
         with:
           repository: libretro/RetroArch
           submodules: recursive
+          path: RetroArch
 
       # ----------------------------
       # Install Visual Studio Build Tools
@@ -79,9 +80,9 @@ jobs:
       # ----------------------------
       - name: Build libretro-ffmpeg core
         shell: cmd
-        working-directory: ${{ github.workspace }}\\RetroArch\\cores\\libretro-ffmpeg
+        working-directory: ${{ github.workspace }}\RetroArch\cores\libretro-ffmpeg
         env:
-          FFMPEG_PREFIX: ${{ github.workspace }}\\ffmpeg-src\\build-msvc\\install
+          FFMPEG_PREFIX: ${{ github.workspace }}\ffmpeg-src\build-msvc\install
         run: |
           REM Enter MSVC environment
           CALL "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
