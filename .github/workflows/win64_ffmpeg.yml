@@ -61,9 +61,9 @@ jobs:
           
       - name: Build libretro-ffmpeg core (MSVC)
         shell: cmd
-        working-directory: RetroArch\cores\libretro-ffmpeg
+        working-directory: RetroArch/cores/libretro-ffmpeg
         env:
-          FFMPEG_STATIC_PREFIX: ${{ github.workspace }}\ffmpeg-src
+          FFMPEG_STATIC_PREFIX: ${{ github.workspace }}\ffmpeg-static
         run: >
           REM Enter MSVC environment
 
