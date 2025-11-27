@@ -75,8 +75,8 @@ jobs:
       # Build libretro-ffmpeg core
       # ----------------------------
       - name: Build libretro-ffmpeg core (Windows x64)
+        working-directory: RetroArch/cores/libretro-ffmpeg
         run: |
-          cd $CORES_DIR
           make clean || true
 
           # Set cross compiler and FFmpeg paths
