@@ -73,33 +73,47 @@ jobs:
           ls ${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample || true
       - name: Build libretro core
         working-directory: RetroArch/cores/libretro-ffmpeg
-        run: >
-          export
-          PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/ffmpeg-static/lib/pkgconfig"
+        run: |
+          export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/ffmpeg-static/lib/pkgconfig"
 
+          echo "== PKGCONFIG LIBS =="
           pkg-config --libs --static libavcodec
-
+          echo "== PKGCONFIG CFLAGS =="
           pkg-config --cflags --static libavcodec
-
-          echo "$PKG_CONFIG_PATH"
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
 
           make clean || true
 
-          # try to make these CFLAGS come last, since it seems they're getting clobbered everywhere else
-          echo "CFLAGS += -I${GITHUB_WORKSPACE}/ffmpeg-static/include -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libswscale -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavutil -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavcodec -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavformat" >> Makefile.common
-          echo "FFMPEG_OPTS := \$(addprefix -D,\$(FFMPEG_OPTS))" >> Makefile.common
-          echo "FFMPEG_DEFINES := $(addprefix -D,$(FFMPEG_DEFINES))" >> Makefile.common
-          
-          # Patch bad GIT_VERSION quoting
-          sed -i 's/-DGIT_VERSION=.*//g' Makefile.common
-          echo "GIT_VERSION := $(git -C ../../.. rev-parse --short HEAD)" >> Makefile.common
-          echo "CFLAGS += -DGIT_VERSION=\\\"$(git -C ../../.. rev-parse --short HEAD)\\\"" >> Makefile.common
+          ###############################################################################
+          # 1. Append correct include paths (placed LAST so nothing overrides them)
+          ###############################################################################
+          echo "CFLAGS += -I${GITHUB_WORKSPACE}/ffmpeg-static/include \
+           -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample \
+           -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libswscale \
+           -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavutil \
+           -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavcodec \
+           -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavformat" \
+           >> Makefile.common
 
+          ###############################################################################
+          # 2. Remove incorrect / broken upstream define generation
+          ###############################################################################
+          echo 'override FFMPEG_DEFINES :=' >> Makefile.common
+          echo 'override FFMPEG_OPTS :=' >> Makefile.common
+
+          ###############################################################################
+          # 3. Fix GIT_VERSION so it can’t break compilation
+          ###############################################################################
+          echo 'GIT_VERSION := $(shell git -C $$(git rev-parse --show-toplevel) rev-parse --short HEAD)' >> Makefile.common
+          echo 'CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"' >> Makefile.common
+
+          ###############################################################################
+          # 4. Build core with FFmpeg statically linked
+          ###############################################################################
           make \
             FFMPEG_DIR=${GITHUB_WORKSPACE}/ffmpeg-static \
             platform=win \
             CC=x86_64-w64-mingw32-gcc \
-            LIBS="-L../../../ffmpeg-static/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic" \
             CXX=x86_64-w64-mingw32-g++ \
             STATIC_LINK_FFMPEG=1 \
             BAKE_IN_FFMPEG=1 \
@@ -109,9 +123,9 @@ jobs:
             INTERNAL_SWSCALE=1 \
             INTERNAL_OGG=0 \
             INTERNAL_VORBIS=0 \
-            FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)" #\
-#            CFLAGS="-I../../../ffmpeg-static/include -I../../../ffmpeg-static/x86_64-w64-mingw32/include -I./.. -I. -I./../../libretro-common/include -I./../../libretro-common/include/compat" 
-            
+            LIBS="-L../../../ffmpeg-static/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic" \
+            FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+
       - name: Zip output
         working-directory: RetroArch/cores/libretro-ffmpeg
         run: |
