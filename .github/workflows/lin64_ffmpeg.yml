@@ -55,7 +55,6 @@ jobs:
           --enable-gpl \
           --enable-nonfree \
           --disable-autodetect \
-          --disable-everything \
           --enable-protocol=file \
           --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
           --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
