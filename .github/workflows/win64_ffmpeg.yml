@@ -89,6 +89,11 @@ jobs:
           echo "CFLAGS += -I${GITHUB_WORKSPACE}/ffmpeg-static/include -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libswscale -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavutil -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavcodec -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavformat" >> Makefile.common
           echo "FFMPEG_OPTS := \$(addprefix -D,\$(FFMPEG_OPTS))" >> Makefile.common
           echo "FFMPEG_DEFINES := $(addprefix -D,$(FFMPEG_DEFINES))" >> Makefile.common
+          
+          # Patch bad GIT_VERSION quoting
+          sed -i 's/-DGIT_VERSION=.*//g' Makefile.common
+          echo "GIT_VERSION := $(git -C ../../.. rev-parse --short HEAD)" >> Makefile.common
+          echo "CFLAGS += -DGIT_VERSION=\\\"$(git -C ../../.. rev-parse --short HEAD)\\\"" >> Makefile.common
 
           make \
             FFMPEG_DIR=${GITHUB_WORKSPACE}/ffmpeg-static \
