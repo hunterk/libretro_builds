@@ -132,7 +132,7 @@ jobs:
             INTERNAL_VORBIS=0 \
             LIBS="-L../../../ffmpeg-static/lib -lavformat -lavcodec -lavutil -lswscale -lswresample -lws2_32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic" \
             FFMPEG_LDFLAGS="$(pkg-config --static --libs libavformat libavcodec  libavutil libswscale libswresample)" \
-            FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS -lws2_32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic"
+            FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS -lws2_32 -lsecur32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic"
 
       - name: Zip output
         working-directory: RetroArch/cores/libretro-ffmpeg
