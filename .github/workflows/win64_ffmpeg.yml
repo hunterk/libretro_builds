@@ -1,94 +1,75 @@
 name: ffmpeg libretro Windows x64
-
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: 0 2 * * *
   watch:
-    types: [started]
+    types:
+      - started
     if: github.actor == github.event.repository.owner.login
-
 jobs:
   Build:
     name: Build for Windows
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout source
-      run: |
-        git clone https://github.com/libretro/RetroArch.git
-        cd RetroArch
-        git submodule update --init --recursive
+      - name: Checkout source
+        run: |
+          git clone https://github.com/libretro/RetroArch.git
+          cd RetroArch
+          git submodule update --init --recursive
+      - name: Install base build tools
+        run: sudo apt-get update && sudo apt-get install -y autoconf automake
+          build-essential cmake mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools
+          git-core libass-dev libfreetype6-dev libgnutls28-dev meson ninja-build
+          pkg-config texinfo yasm nasm zlib1g-dev libbz2-dev liblzma-dev
+          libgl1-mesa-dev
+      - name: Download FFmpeg source
+        run: |
+          git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
+          cd ffmpeg-src
+          git checkout release/6.1   # or any version you want
+      - name: setup some directories ahead of time
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/ffmpeg-static/include"
+          mkdir -p "${GITHUB_WORKSPACE}/ffmpeg-static/lib"
+      - name: Configure and build static FFmpeg
+        run: >
+          cd ffmpeg-src
 
-    - name: Install base build tools
-      run: sudo apt-get update && sudo apt-get install -y autoconf automake build-essential cmake mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools git-core libass-dev libfreetype6-dev libgnutls28-dev meson ninja-build pkg-config texinfo yasm nasm zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev
+          ./configure --prefix="${GITHUB_WORKSPACE}/ffmpeg-static" --pkg-config-flags="--static" --extra-cflags="-fPIC" --extra-ldflags="-static" --cc=/usr/bin/x86_64-w64-mingw32-gcc --cxx=/usr/bin/x86_64-w64-mingw32-g++ --target-os=mingw32 --arch=x86_64 --enable-cross-compile --cross-prefix=x86_64-w64-mingw32- --enable-static --disable-shared --disable-programs --disable-doc --disable-debug --enable-pic --enable-gpl --enable-nonfree --disable-autodetect --disable-everything --enable-protocol=file --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le --enable-swresample --enable-swscale
 
-    # ------------------------------------------------------------------
-    #       BUILD STATIC FFMPEG FROM SOURCE
-    # ------------------------------------------------------------------
-    - name: Download FFmpeg source
-      run: |
-        git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
-        cd ffmpeg-src
-        git checkout release/6.1   # or any version you want
+          make -j$(nproc)
 
-    -name: setup some directories ahead of time
-      run: |
-        mkdir -p "${GITHUB_WORKSPACE}/ffmpeg-static/include"
-        mkdir -p "${GITHUB_WORKSPACE}/ffmpeg-static/lib"
+          make install
+      - name: debug - list FFmpeg include directories
+        run: |
+          echo "Listing ffmpeg-static/include:"
+          ls -R ${GITHUB_WORKSPACE}/ffmpeg-static/include || true
 
-    - name: Configure and build static FFmpeg
-      run: |
-        cd ffmpeg-src
+          echo "Checking for swresample headers:"
+          ls ${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample || true
+      - name: Build libretro core
+        working-directory: RetroArch/cores/libretro-ffmpeg
+        run: >
+          export
+          PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/ffmpeg-static/lib/pkgconfig"
 
-        ./configure --prefix="${GITHUB_WORKSPACE}/ffmpeg-static" --pkg-config-flags="--static" --extra-cflags="-fPIC" --extra-ldflags="-static" --cc=/usr/bin/x86_64-w64-mingw32-gcc --cxx=/usr/bin/x86_64-w64-mingw32-g++ --target-os=mingw32 --arch=x86_64 --enable-cross-compile --cross-prefix=x86_64-w64-mingw32- --enable-static --disable-shared --disable-programs --disable-doc --disable-debug --enable-pic --enable-gpl --enable-nonfree --disable-autodetect --disable-everything --enable-protocol=file --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le --enable-swresample --enable-swscale
+          pkg-config --libs --static libavcodec
 
-        make -j$(nproc)
-        make install
+          pkg-config --cflags --static libavcodec
 
-    - name: Debug: list FFmpeg include directories
-      run: |
-        echo "Listing ffmpeg-static/include:"
-        ls -R ${GITHUB_WORKSPACE}/ffmpeg-static/include || true
+          echo "$PKG_CONFIG_PATH"
 
-        echo "Checking for swresample headers:"
-        ls ${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample || true
+          make clean || true
 
-    # ------------------------------------------------------------------
-    #       BUILD LIBRETRO FFMPEG CORE USING STATIC FFMPEG
-    # ------------------------------------------------------------------
-    - name: Build libretro core
-      working-directory: RetroArch/cores/libretro-ffmpeg
-#      env:
-#        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
-      run: |
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/ffmpeg-static/lib/pkgconfig"
-        pkg-config --libs --static libavcodec
-        pkg-config --cflags --static libavcodec
-        echo "$PKG_CONFIG_PATH"
-
-        make clean || true
-
-        make platform=win CC=x86_64-w64-mingw32-gcc LIBS="-L../../../ffmpeg-static/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic" CFLAGS="-I../../../ffmpeg-static/include -I../../../ffmpeg-static/x86_64-w64-mingw32/include -I./.. -I. -I./../../libretro-common/include -I./../../libretro-common/include/compat" CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
-
-    # ------------------------------------------------------------------
-    #       POST-PROCESSING
-    # ------------------------------------------------------------------
-#    - name: Strip libs
-#      working-directory: RetroArch/cores/libretro-ffmpeg
-#      run: |
-#        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh
-#        chmod +x retrolink.sh
-#        ./retrolink.sh *.dll
-
-    - name: Zip output
-      working-directory: RetroArch/cores/libretro-ffmpeg
-      run: |
-        zip -9 ../../../ffmpeg_libretro.dll.zip ffmpeg_libretro.dll
-        
-    - name: Publish release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        tag: Windows_64-bit
-        file: ffmpeg_libretro.dll.zip
-        overwrite: true
+          make platform=win CC=x86_64-w64-mingw32-gcc LIBS="-L../../../ffmpeg-static/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic" CFLAGS="-I../../../ffmpeg-static/include -I../../../ffmpeg-static/x86_64-w64-mingw32/include -I./.. -I. -I./../../libretro-common/include -I./../../libretro-common/include/compat" CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+      - name: Zip output
+        working-directory: RetroArch/cores/libretro-ffmpeg
+        run: |
+          zip -9 ../../../ffmpeg_libretro.dll.zip ffmpeg_libretro.dll
+      - name: Publish release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: Windows_64-bit
+          file: ffmpeg_libretro.dll.zip
+          overwrite: true
