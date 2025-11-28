@@ -31,6 +31,11 @@ jobs:
         cd ffmpeg-src
         git checkout release/6.1   # or any version you want
 
+    -name: setup some directories ahead of time
+      run: |
+        mkdir -p "${GITHUB_WORKSPACE}/ffmpeg-static/include"
+        mkdir -p "${GITHUB_WORKSPACE}/ffmpeg-static/lib"
+
     - name: Configure and build static FFmpeg
       run: |
         cd ffmpeg-src
@@ -39,6 +44,14 @@ jobs:
 
         make -j$(nproc)
         make install
+
+    - name: Debug: list FFmpeg include directories
+      run: |
+        echo "Listing ffmpeg-static/include:"
+        ls -R ${GITHUB_WORKSPACE}/ffmpeg-static/include || true
+
+        echo "Checking for swresample headers:"
+        ls ${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample || true
 
     # ------------------------------------------------------------------
     #       BUILD LIBRETRO FFMPEG CORE USING STATIC FFMPEG
@@ -55,7 +68,7 @@ jobs:
 
         make clean || true
 
-        make platform=win CC=x86_64-w64-mingw32-gcc LIBS="-L../../../ffmpeg-static/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic" CFLAGS="-I../../../ffmpeg-static/include -I./.. -I. -I./../../libretro-common/include -I./../../libretro-common/include/compat" CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+        make platform=win CC=x86_64-w64-mingw32-gcc LIBS="-L../../../ffmpeg-static/lib -lavcodec -lole32 -lavutil -lm -luser32 -lbcrypt -latomic" CFLAGS="-I../../../ffmpeg-static/include -I../../../ffmpeg-static/x86_64-w64-mingw32/include -I./.. -I. -I./../../libretro-common/include -I./../../libretro-common/include/compat" CXX=x86_64-w64-mingw32-g++ STATIC_LINK_FFMPEG=1 FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
     # ------------------------------------------------------------------
     #       POST-PROCESSING
