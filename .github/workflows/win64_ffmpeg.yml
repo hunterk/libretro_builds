@@ -107,6 +107,10 @@ jobs:
           echo 'GIT_VERSION := $(shell git -C $$(git rev-parse --show-toplevel) rev-parse --short HEAD)' >> Makefile.common
           echo 'CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"' >> Makefile.common
 
+          # put -D in front of all FFMPEG_OPTS
+          echo 'FFMPEG_OPTS := $(addprefix -D,$(FFMPEG_OPTS))' >> Makefile.common
+          echo 'CFLAGS += $(FFMPEG_OPTS)' >> Makefile.common
+
           ###############################################################################
           # 4. Build core with FFmpeg statically linked
           ###############################################################################
