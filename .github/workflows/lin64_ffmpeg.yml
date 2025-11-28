@@ -42,6 +42,7 @@ jobs:
         cd ffmpeg-src
 
         ./configure \
+          --prefix="$GITHUB_WORKSPACE/ffmpeg-static" \
           --pkg-config-flags="--static" \
           --extra-cflags="-fPIC" \
           --extra-ldflags="-static" \
