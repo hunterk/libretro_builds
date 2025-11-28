@@ -86,7 +86,7 @@ jobs:
           make clean || true
 
           # try to make these CFLAGS come last, since it seems they're getting clobbered everywhere else
-          echo "
+          echo " \
             CFLAGS += \
             -I${GITHUB_WORKSPACE}/ffmpeg-static/include \
             -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample \
