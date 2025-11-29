@@ -35,7 +35,7 @@ jobs:
       run: |
         git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
         cd ffmpeg-src
-        git checkout release/6.1   # or any version you want
+        git checkout release/7.1   # or any version you want
 
     - name: Configure and build static FFmpeg
       run: |
@@ -64,9 +64,6 @@ jobs:
         make -j$(nproc)
         make install
 
-    # ------------------------------------------------------------------
-    #       BUILD LIBRETRO FFMPEG CORE USING STATIC FFMPEG
-    # ------------------------------------------------------------------
     - name: Build libretro core
       working-directory: RetroArch/cores/libretro-ffmpeg
       env:
@@ -74,10 +71,6 @@ jobs:
       run: |
         # Add static FFmpeg pkgconfig directory
         export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-        # Optional: show what pkg-config resolves (debug)
-        pkg-config --libs --static libavcodec
-        pkg-config --cflags --static libavcodec
 
         make clean || true
 
@@ -87,9 +80,6 @@ jobs:
           FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" \
           FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
 
-    # ------------------------------------------------------------------
-    #       POST-PROCESSING
-    # ------------------------------------------------------------------
     - name: Strip libs
       working-directory: RetroArch/cores/libretro-ffmpeg
       run: |
