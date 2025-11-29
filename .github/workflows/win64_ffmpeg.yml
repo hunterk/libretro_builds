@@ -122,7 +122,7 @@ jobs:
             platform=win \
             CC=x86_64-w64-mingw32-gcc \
             CXX=x86_64-w64-mingw32-g++ \
-            STATIC_LINKING=1 \
+            STATIC_LINK_FFMPEG=1 \
             BAKE_IN_FFMPEG=1 \
             HAVE_SWSCALE=1 \
             HAVE_SWRESAMPLE=1 \
