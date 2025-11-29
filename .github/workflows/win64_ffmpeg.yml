@@ -2,10 +2,10 @@ name: ffmpeg libretro Windows x64
 on:
   schedule:
     - cron: 0 2 * * *
-#  watch:
-#    types:
-#      - started
-#    if: github.actor == github.event.repository.owner.login
+  watch:
+    types:
+      - started
+    if: github.actor == github.event.repository.owner.login
 jobs:
   Build:
     name: Build for Windows
@@ -122,7 +122,7 @@ jobs:
             platform=win \
             CC=x86_64-w64-mingw32-gcc \
             CXX=x86_64-w64-mingw32-g++ \
-            STATIC_LINK_FFMPEG=1 \
+            STATIC_LINKING=1 \
             BAKE_IN_FFMPEG=1 \
             HAVE_SWSCALE=1 \
             HAVE_SWRESAMPLE=1 \
@@ -131,8 +131,8 @@ jobs:
             INTERNAL_OGG=0 \
             INTERNAL_VORBIS=0 \
             LIBS="-L../../../ffmpeg-static/lib -lavformat -lavcodec -lavutil -lswscale -lswresample -lws2_32 -lsecur32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic" \
-            FFMPEG_LDFLAGS="$(pkg-config --static --libs libavformat libavcodec  libavutil libswscale libswresample)" \
-            FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS -lws2_32 -lsecur32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic"
+            #FFMPEG_LDFLAGS="$(pkg-config --static --libs libavformat libavcodec  libavutil libswscale libswresample)" \
+            #FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS -lws2_32 -lsecur32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic"
 
       - name: Zip output
         working-directory: RetroArch/cores/libretro-ffmpeg
