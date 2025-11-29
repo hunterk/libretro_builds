@@ -1,0 +1,101 @@
+name: ffmpeg libretro Linux aarch64
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  watch:
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Build:
+    name: Build for Linux
+    runs-on: ubuntu-latest-arm64
+
+    steps:
+    - name: Checkout source
+      run: |
+        git clone https://github.com/libretro/RetroArch.git
+        cd RetroArch
+        git submodule update --init --recursive
+
+    - name: Install base build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          autoconf automake build-essential cmake git-core \
+          libass-dev libfreetype6-dev libgnutls28-dev \
+          meson ninja-build pkg-config texinfo yasm nasm \
+          zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev
+
+    # ------------------------------------------------------------------
+    #       BUILD STATIC FFMPEG FROM SOURCE
+    # ------------------------------------------------------------------
+    - name: Download FFmpeg source
+      run: |
+        git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
+        cd ffmpeg-src
+        git checkout release/7.1   # or any version you want
+
+    - name: Configure and build static FFmpeg
+      run: |
+        cd ffmpeg-src
+
+        ./configure \
+          --prefix="$GITHUB_WORKSPACE/ffmpeg-static" \
+          --pkg-config-flags="--static" \
+          --extra-cflags="-fPIC" \
+          --extra-ldflags="-static" \
+          --enable-static \
+          --disable-shared \
+          --disable-programs \
+          --disable-doc \
+          --disable-debug \
+          --enable-pic \
+          --enable-gpl \
+          --enable-nonfree \
+          --disable-autodetect \
+          --enable-protocol=file \
+          --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
+          --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
+          --enable-swresample \
+          --enable-swscale
+
+        make -j$(nproc)
+        make install
+
+    - name: Build libretro core
+      working-directory: RetroArch/cores/libretro-ffmpeg
+      env:
+        FFMPEG_STATIC_PREFIX: ${{ github.workspace }}/ffmpeg-static
+      run: |
+        # Add static FFmpeg pkgconfig directory
+        export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+        make clean || true
+
+        make \
+          STATIC_LINK_FFMPEG=1 \
+          FFMPEG_DIR="${FFMPEG_STATIC_PREFIX}" \
+          FFMPEG_CFLAGS="-I${FFMPEG_STATIC_PREFIX}/include" \
+          FFMPEG_LDFLAGS="$(pkg-config --static --libs libavcodec libavformat libavutil libswresample libswscale)"
+
+    - name: Strip libs
+      working-directory: RetroArch/cores/libretro-ffmpeg
+      run: |
+        wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh
+        chmod +x retrolink.sh
+        ./retrolink.sh *.so
+
+    - name: Zip output
+      working-directory: RetroArch/cores/libretro-ffmpeg
+      run: |
+        zip -9 ../../../ffmpeg_libretro.so.zip ffmpeg_libretro.so
+
+    - name: Publish release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Linux_aarch64
+        file: ffmpeg_libretro.so.zip
+        overwrite: true
