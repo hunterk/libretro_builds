@@ -83,9 +83,6 @@ jobs:
            -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavformat" \
            >> Makefile.common
 
-          # fix typo in Makefile.ffmpeg
-          sed -i 's/HAVE_ATOMICS_WIN32=1/-DHAVE_ATOMICS_WIN32=1/g' Makefile.ffmpeg
-
           ###############################################################################
           # 2. Build core with FFmpeg statically linked
           ###############################################################################
