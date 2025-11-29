@@ -64,23 +64,11 @@ jobs:
           make -j$(nproc)
 
           make install
-      - name: debug - list FFmpeg include directories
-        run: |
-          echo "Listing ffmpeg-static/include:"
-          ls -R ${GITHUB_WORKSPACE}/ffmpeg-static/include || true
 
-          echo "Checking for swresample headers:"
-          ls ${GITHUB_WORKSPACE}/ffmpeg-static/include/libswresample || true
       - name: Build libretro core
         working-directory: RetroArch/cores/libretro-ffmpeg
         run: |
           export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/ffmpeg-static/lib/pkgconfig"
-
-          echo "== PKGCONFIG LIBS =="
-          pkg-config --libs --static libavcodec
-          echo "== PKGCONFIG CFLAGS =="
-          pkg-config --cflags --static libavcodec
-          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
 
           make clean || true
 
@@ -95,27 +83,11 @@ jobs:
            -I${GITHUB_WORKSPACE}/ffmpeg-static/include/libavformat" \
            >> Makefile.common
 
-          ###############################################################################
-          # 2. Remove incorrect / broken upstream define generation
-          ###############################################################################
-          #echo 'override FFMPEG_DEFINES :=' >> Makefile.common
-          #echo 'override FFMPEG_OPTS :=' >> Makefile.common
-
-          ###############################################################################
-          # 3. Fix GIT_VERSION so it can’t break compilation
-          ###############################################################################
-          #echo 'GIT_VERSION := $(shell git -C $$(git rev-parse --show-toplevel) rev-parse --short HEAD)' >> Makefile.common
-          #echo 'CFLAGS += -DGIT_VERSION=\"$(GIT_VERSION)\"' >> Makefile.common
-
-          # put -D in front of all FFMPEG_OPTS
-          #echo 'FFMPEG_OPTS := $(addprefix -D,$(FFMPEG_OPTS))' >> Makefile.common
-          #echo 'CFLAGS += $(FFMPEG_OPTS)' >> Makefile.common
-
-          # patch libretro-ffmpeg Makefile.ffmpeg
+          # fix typo in Makefile.ffmpeg
           sed -i 's/HAVE_ATOMICS_WIN32=1/-DHAVE_ATOMICS_WIN32=1/g' Makefile.ffmpeg
 
           ###############################################################################
-          # 4. Build core with FFmpeg statically linked
+          # 2. Build core with FFmpeg statically linked
           ###############################################################################
           make \
             FFMPEG_DIR=${GITHUB_WORKSPACE}/ffmpeg-static \
@@ -130,9 +102,7 @@ jobs:
             INTERNAL_SWSCALE=1 \
             INTERNAL_OGG=0 \
             INTERNAL_VORBIS=0 \
-            LIBS="-L../../../ffmpeg-static/lib -lavformat -lavcodec -lavutil -lswscale -lswresample -lws2_32 -lsecur32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic" \
-            #FFMPEG_LDFLAGS="$(pkg-config --static --libs libavformat libavcodec  libavutil libswscale libswresample)" \
-            #FFMPEG_LDFLAGS="$FFMPEG_LDFLAGS -lws2_32 -lsecur32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic"
+            LIBS="-L../../../ffmpeg-static/lib -lavformat -lavcodec -lavutil -lswscale -lswresample -lws2_32 -lsecur32 -lole32 -lstrmiids -luuid -lopengl32 -luser32 -lbcrypt -lm -latomic"
 
       - name: Zip output
         working-directory: RetroArch/cores/libretro-ffmpeg
