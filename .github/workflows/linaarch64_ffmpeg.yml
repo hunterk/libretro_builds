@@ -74,6 +74,9 @@ jobs:
 
         echo "SOURCES_C += ../../libretro-common/streams/file_stream.c" >> Makefile.common
         echo "SOURCES_C += ../../libretro-common/string/stdstring.c" >> Makefile.common
+        echo "SOURCES_C += ../../libretro-common/vfs/vfs_implementation.c" >> Makefile.common
+        echo "SOURCES_C += ../../libretro-common/file/file_path.c" >> Makefile.common
+        echo "SOURCES_C += ../../libretro-common/string/utf8.c" >> Makefile.common
 
         make clean || true
 
