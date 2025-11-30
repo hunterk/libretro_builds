@@ -15,7 +15,7 @@ jobs:
     steps:
     - name: Checkout source
       run: |
-        git clone https://github.com/libretro/RetroArch.git
+        git clone https://github.com/hunterk/RetroArch.git
         cd RetroArch
         git submodule update --init --recursive
 
@@ -72,16 +72,16 @@ jobs:
         # Add static FFmpeg pkgconfig directory
         export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
 
-        echo "SOURCES_C += ../../libretro-common/streams/file_stream.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/string/stdstring.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/vfs/vfs_implementation.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/file/file_path.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/encodings/encoding_utf.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/file/file_path_io.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/time/rtime.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/compat/compat_strl.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/file/file_path_io.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/time/rtime.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/streams/file_stream.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/string/stdstring.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/vfs/vfs_implementation.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/file/file_path.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/encodings/encoding_utf.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/file/file_path_io.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/time/rtime.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/compat/compat_strl.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/file/file_path_io.c" >> Makefile.common
+        #echo "SOURCES_C += ../../libretro-common/time/rtime.c" >> Makefile.common
 
         make clean || true
 
