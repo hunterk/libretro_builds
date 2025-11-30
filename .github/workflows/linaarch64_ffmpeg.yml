@@ -79,7 +79,9 @@ jobs:
         echo "SOURCES_C += ../../libretro-common/encodings/encoding_utf.c" >> Makefile.common
         echo "SOURCES_C += ../../libretro-common/file/file_path_io.c" >> Makefile.common
         echo "SOURCES_C += ../../libretro-common/time/rtime.c" >> Makefile.common
-        echo "SOURCES_C += ../../libretro-common/string/string_list.c" >> Makefile.common
+        echo "SOURCES_C += ../../libretro-common/compat/strl.c" >> Makefile.common
+        echo "SOURCES_C += ../../libretro-common/file/file_path_io.c" >> Makefile.common
+        echo "SOURCES_C += ../../libretro-common/time/rtime.c" >> Makefile.common
 
         make clean || true
 
