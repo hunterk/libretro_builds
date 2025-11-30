@@ -73,6 +73,7 @@ jobs:
         export PKG_CONFIG_PATH="${FFMPEG_STATIC_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
 
         echo "SOURCES_C += $(LIBRETRO_COMM_DIR)/streams/file_stream.c" >> Makefile.common
+        echo "OBJECTS   += ../../libretro-common/streams/file_stream.o" >> Makefile
 
         make clean || true
 
