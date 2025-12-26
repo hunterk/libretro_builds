@@ -20,7 +20,7 @@ jobs:
     - name: Build libretro core
       working-directory: mupen64plus-libretro-nx
       run: |
-        make -j8 GLES=0
+        make -j8 GLES=0 HAVE_PARALLEL_RSP=1 HAVE_PARALLEL_RDP=1
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh mupen64plus_next_libretro.so
         zip -9 ../mupen64plus_next_libretro_NO-GLES.zip mupen64plus_next_libretro.so
     - name: Create new release
