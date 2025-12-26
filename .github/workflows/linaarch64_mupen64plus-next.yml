@@ -3,9 +3,9 @@ name: Mupen64plus-Next libretro Linux aarch64
 on:
   schedule:
     - cron: '0 2 * * *' # run at 2 AM UTC
-#  watch: # this is a hack that lets repo owners trigger a build by starring
-#    types: [started]
-#    if: github.actor == github.event.repository.owner.login
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Linux:
@@ -20,7 +20,7 @@ jobs:
     - name: Build libretro core
       working-directory: mupen64plus-libretro-nx
       run: |
-        make -j8 GLES3=1
+        make -j8 GLES3=1 HAVE_PARALLEL_RSP=1 HAVE_PARALLEL_RDP=1
         wget https://raw.githubusercontent.com/libretro/libretro-super/master/retrolink.sh && chmod +x retrolink.sh && ./retrolink.sh mupen64plus_next_libretro.so
         zip -9 ../mupen64plus_next_libretro.so.zip mupen64plus_next_libretro.so
     - name: Create new release
