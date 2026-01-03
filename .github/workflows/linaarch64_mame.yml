@@ -2,7 +2,7 @@ name: MAME libretro Linux aarch64
 
 on:
   schedule:
-    - cron: '0 2 1 * *' # run at 2 AM UTC
+    - cron: '0 2 4 * *' # run at 2 AM UTC
 #  watch: # this is a hack that lets repo owners trigger a build by starring
 #    types: [started]
 #    if: github.actor == github.event.repository.owner.login
