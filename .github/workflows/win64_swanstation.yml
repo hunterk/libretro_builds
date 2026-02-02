@@ -1,0 +1,46 @@
+name: swanstation-libretro Windows x86_64
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  watch: # this is a hack that lets repo owners trigger a build by starring
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
+
+jobs:
+  Windows:
+    name: Build for Windows
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup MSVC Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Setup Windows SDK 10.0.22621
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
+      with:
+        sdk-version: 22621
+    - name: Check Compiler Version
+      run: cl.exe
+    - name: Get latest CMake
+      uses: ssrobins/install-cmake@v1
+    - name: Checkout source
+      run: git clone --single-branch --branch testing https://github.com/hunterk/swanstation.git && cd swanstation && git submodule update --init --recursive
+    - name: Prepare to build
+      working-directory: swanstation
+      run: mkdir build && cd build && cmake.exe ..
+
+    - name: Build the thing
+      working-directory: swanstation/build
+      run: cmake.exe --build . 
+
+    - name: Prep for release
+      working-directory: swanstation/build
+      run: Compress-Archive -CompressionLevel Optimal -Path swanstation_libretro.dll -DestinationPath ..\..\swanstation_libretro.dll.zip
+    - name: Create new release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: Windows_64-bit
+        file: swanstation_libretro.dll.zip
+        overwrite: true
