@@ -25,7 +25,7 @@ jobs:
     - name: Get latest CMake
       uses: ssrobins/install-cmake@v1
     - name: Checkout source
-      run: git clone --single-branch --branch testing https://github.com/hunterk/swanstation.git && cd swanstation && git submodule update --init --recursive
+      run: git clone https://github.com/hunterk/swanstation.git && cd swanstation && git submodule update --init --recursive
     - name: Prepare to build
       working-directory: swanstation
       run: mkdir build && cd build && cmake.exe ..
