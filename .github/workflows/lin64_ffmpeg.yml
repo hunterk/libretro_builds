@@ -3,9 +3,9 @@ name: ffmpeg libretro Linux x86_64
 on:
   schedule:
     - cron: '0 2 * * *'
-#  watch:
-#    types: [started]
-#    if: github.actor == github.event.repository.owner.login
+  watch:
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Build:
@@ -26,7 +26,8 @@ jobs:
           autoconf automake build-essential cmake git-core \
           libass-dev libfreetype6-dev libgnutls28-dev \
           meson ninja-build pkg-config texinfo yasm nasm \
-          zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev
+          zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev \
+          libdav1d-dev
 
     # ------------------------------------------------------------------
     #       BUILD STATIC FFMPEG FROM SOURCE
@@ -58,6 +59,7 @@ jobs:
           --enable-protocol=file \
           --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
           --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
+          --enable-libdav1d \
           --enable-swresample \
           --enable-swscale
 
