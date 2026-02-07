@@ -58,7 +58,7 @@ jobs:
           # Use --default-library=static
           meson .. --buildtype release --default-library=static --prefix="$GITHUB_WORKSPACE/dav1d-static"
           ninja
-          sudo ninja install
+          ninja install
           # Ensure pkg-config can find the newly installed .pc file
           export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/dav1d-static/lib/pkgconfig"
         
@@ -74,6 +74,10 @@ jobs:
       - name: Configure and build static FFmpeg
         run: >
           cd ffmpeg-src
+
+          export PKG_CONFIG=x86_64-w64-mingw32-pkg-config
+          export PKG_CONFIG_LIBDIR="$GITHUB_WORKSPACE/dav1d-static/lib/pkgconfig"
+          export PKG_CONFIG_PATH=""
 
           ./configure \
             --prefix="$GITHUB_WORKSPACE/ffmpeg-static" \
@@ -102,6 +106,10 @@ jobs:
               --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
               --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
               --enable-libdav1d
+          #debug steps
+          grep DAV1D ffbuild/config.log
+          grep DAV1D ffbuild/config.h
+          
           make -j$(nproc)
 
           make install
