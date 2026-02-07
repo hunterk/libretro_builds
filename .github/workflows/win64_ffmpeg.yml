@@ -46,9 +46,8 @@ jobs:
           echo "cpp = 'x86_64-w64-mingw32-g++'" >> mingwbuild.txt
           echo "ar = 'x86_64-w64-mingw32-ar'" >> mingwbuild.txt
           echo "windres = 'x86_64-w64-mingw32-windres'" >> mingwbuild.txt
-          echo "nasm = 'x86_64-w64-mingw32-nasm'" >> mingwbuild.txt
+          echo "nasm = '/usr/bin/nasm'" >> mingwbuild.txt
           echo "strip = 'x86_64-w64-mingw32-strip'" >> mingwbuild.txt
-          echo "pkg-config = 'x86_64-w64-mingw32-pkg-config'" >> mingwbuild.txt
           echo "exe_wrapper = ''" >> mingwbuild.txt
           echo "[host_machine]" >> mingwbuild.txt
           echo "system = 'windows'" >> mingwbuild.txt
@@ -56,7 +55,7 @@ jobs:
           echo "cpu = 'x86_64'" >> mingwbuild.txt
           echo "endian = 'little'" >> mingwbuild.txt
           meson setup --cross-file mingwbuild.txt
-          # Use --default-library=static to avoid runtime shared library issues
+          # Use --default-library=static
           meson .. --buildtype release --default-library=static --prefix="$GITHUB_WORKSPACE/dav1d-static"
           ninja
           sudo ninja install
