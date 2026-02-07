@@ -46,7 +46,9 @@ jobs:
           echo "cpp = 'x86_64-w64-mingw32-g++'" >> mingwbuild.txt
           echo "ar = 'x86_64-w64-mingw32-ar'" >> mingwbuild.txt
           echo "windres = 'x86_64-w64-mingw32-windres'" >> mingwbuild.txt
+          echo "nasm = 'x86_64-w64-mingw32-nasm'" >> mingwbuild.txt
           echo "strip = 'x86_64-w64-mingw32-strip'" >> mingwbuild.txt
+          echo "pkg-config = 'x86_64-w64-mingw32-pkg-config'" >> mingwbuild.txt
           echo "exe_wrapper = ''" >> mingwbuild.txt
           echo "[host_machine]" >> mingwbuild.txt
           echo "system = 'windows'" >> mingwbuild.txt
