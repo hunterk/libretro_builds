@@ -40,8 +40,22 @@ jobs:
           cd dav1d
           mkdir build
           cd build
+          # make a stupid meson cross-compile cfg
+          echo "[binaries]" >> mingwbuild.txt
+          echo "c = 'x86_64-w64-mingw32-gcc'" >> mingwbuild.txt
+          echo "cpp = 'x86_64-w64-mingw32-g++'" >> mingwbuild.txt
+          echo "ar = 'x86_64-w64-mingw32-ar'" >> mingwbuild.txt
+          echo "windres = 'x86_64-w64-mingw32-windres'" >> mingwbuild.txt
+          echo "strip = 'x86_64-w64-mingw32-strip'" >> mingwbuild.txt
+          echo "exe_wrapper = ''" >> mingwbuild.txt
+          echo "[host_machine]" >> mingwbuild.txt
+          echo "system = 'windows'" >> mingwbuild.txt
+          echo "cpu_family = 'x86_64'" >> mingwbuild.txt
+          echo "cpu = 'x86_64'" >> mingwbuild.txt
+          echo "endian = 'little'" >> mingwbuild.txt
+          meson setup --cross-file mingwbuild.txt
           # Use --default-library=static to avoid runtime shared library issues
-          CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ meson .. --buildtype release --default-library=static --prefix="$GITHUB_WORKSPACE/dav1d-static"
+          meson .. --buildtype release --default-library=static --prefix="$GITHUB_WORKSPACE/dav1d-static"
           ninja
           sudo ninja install
           # Ensure pkg-config can find the newly installed .pc file
