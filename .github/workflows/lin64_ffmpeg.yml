@@ -27,7 +27,7 @@ jobs:
           libass-dev libfreetype6-dev libgnutls28-dev \
           meson ninja-build pkg-config texinfo yasm nasm \
           zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev \
-          libdav1d-dev
+          libdav1d-dev dav1d libdav1d7
 
     # ------------------------------------------------------------------
     #       BUILD STATIC FFMPEG FROM SOURCE
