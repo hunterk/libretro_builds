@@ -26,6 +26,11 @@ jobs:
             pkg-config texinfo yasm nasm zlib1g-dev libbz2-dev liblzma-dev \
             libgl1-mesa-dev python3 python3-pip python3-setuptools python3-wheel 
           pip3 install --user meson
+          
+      - name: setup some directories ahead of time
+        run: |
+          mkdir -p "${GITHUB_WORKSPACE}/dav1d-static/include"
+          mkdir -p "${GITHUB_WORKSPACE}/dav1d-static/lib"
 
       - name: Build and install dav1d from source
         run: |
@@ -36,11 +41,11 @@ jobs:
           mkdir build
           cd build
           # Use --default-library=static to avoid runtime shared library issues
-          meson .. --buildtype release --default-library=static --prefix=/usr/local
+          meson .. --buildtype release --default-library=static --prefix="$GITHUB_WORKSPACE/dav1d-static" CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++
           ninja
           sudo ninja install
           # Ensure pkg-config can find the newly installed .pc file
-          export PKG_CONFIG_PATH="/usr/local/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"  
+          export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:${GITHUB_WORKSPACE}/dav1d-static/lib/pkgconfig"
         
       - name: Download FFmpeg source
         run: |
