@@ -2,10 +2,10 @@ name: ffmpeg libretro Windows x64
 on:
   schedule:
     - cron: 0 2 * * *
-#  watch:
-#    types:
-#      - started
-#    if: github.actor == github.event.repository.owner.login
+  watch:
+    types:
+      - started
+    if: github.actor == github.event.repository.owner.login
 jobs:
   Build:
     name: Build for Windows
@@ -17,11 +17,31 @@ jobs:
           cd RetroArch
           git submodule update --init --recursive
       - name: Install base build tools
-        run: sudo apt-get update && sudo apt-get install -y autoconf automake
-          build-essential cmake mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools
-          git-core libass-dev libfreetype6-dev libgnutls28-dev meson ninja-build
-          pkg-config texinfo yasm nasm zlib1g-dev libbz2-dev liblzma-dev
-          libgl1-mesa-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf automake \
+            build-essential cmake mingw-w64 mingw-w64-x86-64-dev mingw-w64-tools \
+            git-core libass-dev libfreetype6-dev libgnutls28-dev meson ninja-build \
+            pkg-config texinfo yasm nasm zlib1g-dev libbz2-dev liblzma-dev \
+            libgl1-mesa-dev python3 python3-pip python3-setuptools python3-wheel 
+          pip3 install --user meson
+
+      - name: Build and install dav1d from source
+        run: |
+          # Add the user's local bin to the PATH for meson/ninja
+          export PATH="$HOME/.local/bin:$PATH"
+          git clone https://code.videolan.org/videolan/dav1d.git
+          cd dav1d
+          mkdir build
+          cd build
+          # Use --default-library=static to avoid runtime shared library issues
+          meson .. --buildtype release --default-library=static --prefix=/usr/local
+          ninja
+          sudo ninja install
+          # Ensure pkg-config can find the newly installed .pc file
+          export PKG_CONFIG_PATH="/usr/local/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"  
+        
       - name: Download FFmpeg source
         run: |
           git clone https://github.com/FFmpeg/FFmpeg.git ffmpeg-src
@@ -60,7 +80,8 @@ jobs:
               --enable-avutil \
               --enable-protocol=file \
               --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
-              --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le
+              --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
+              --enable-libdav1d
           make -j$(nproc)
 
           make install
