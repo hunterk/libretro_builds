@@ -3,9 +3,9 @@ name: ffmpeg libretro Linux aarch64
 on:
   schedule:
     - cron: '0 2 * * *'
-#  watch:
-#    types: [started]
-#    if: github.actor == github.event.repository.owner.login
+  watch:
+    types: [started]
+    if: github.actor == github.event.repository.owner.login
 
 jobs:
   Build:
@@ -26,7 +26,24 @@ jobs:
           autoconf automake build-essential cmake git-core \
           libass-dev libfreetype6-dev libgnutls28-dev \
           meson ninja-build pkg-config texinfo yasm nasm \
-          zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev
+          zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev \
+          python3 python3-pip python3-setuptools python3-wheel ninja-build 
+        pip3 install --user meson
+
+    - name: Build and install dav1d from source
+      run: |
+        # Add the user's local bin to the PATH for meson/ninja
+        export PATH="$HOME/.local/bin:$PATH"
+        git clone https://code.videolan.org/videolan/dav1d.git
+        cd dav1d
+        mkdir build
+        cd build
+        # Use --default-library=static to avoid runtime shared library issues
+        meson .. --buildtype release --default-library=static --prefix=/usr/local
+        ninja
+        sudo ninja install
+        # Ensure pkg-config can find the newly installed .pc file
+        export PKG_CONFIG_PATH="/usr/local/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH" 
 
     # ------------------------------------------------------------------
     #       BUILD STATIC FFMPEG FROM SOURCE
@@ -58,6 +75,7 @@ jobs:
           --enable-protocol=file \
           --enable-demuxer=mov,matroska,avi,mp3,aac,ogg,wav,flac \
           --enable-decoder=mp3,aac,vorbis,flac,h264,hevc,pcm_s16le \
+          --enable-libdav1d \
           --enable-swresample \
           --enable-swscale
 
