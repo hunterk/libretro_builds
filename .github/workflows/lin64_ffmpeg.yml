@@ -27,7 +27,23 @@ jobs:
           libass-dev libfreetype6-dev libgnutls28-dev \
           meson ninja-build pkg-config texinfo yasm nasm \
           zlib1g-dev libbz2-dev liblzma-dev libgl1-mesa-dev \
-          libdav1d-dev dav1d libdav1d7
+          python3 python3-pip python3-setuptools python3-wheel ninja-build 
+        pip3 install --user meson
+
+    - name: Build and install dav1d from source
+      run: |
+        # Add the user's local bin to the PATH for meson/ninja
+        export PATH="$HOME/.local/bin:$PATH"
+        git clone https://code.videolan.org/videolan/dav1d.git
+        cd dav1d
+        mkdir build
+        cd build
+        # Use --default-library=static to avoid runtime shared library issues
+        meson .. --buildtype release --default-library=static --prefix=/usr/local
+        ninja
+        sudo ninja install
+        # Ensure pkg-config can find the newly installed .pc file
+        export PKG_CONFIG_PATH="/usr/local/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"  
 
     # ------------------------------------------------------------------
     #       BUILD STATIC FFMPEG FROM SOURCE
